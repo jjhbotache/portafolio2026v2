@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+// Read the projects collection at build time and emit `<link
+// rel="preload" as="image">` only for the SMALL cover images.
+//
+// Heavy assets (above ~500KB) are intentionally NOT preloaded:
+// they would compete with the JS bundle and the LCP candidates of
+// the sections the user actually visits first (Splash, Experience,
+// About). The browser's lazy loader + the HTTP cache already make
+// the rest of the images render instantly when their card scrolls
+// into view, because the same URL will already be in the cache from
+// the previous visit.
+//
+// We pick the threshold by file size rather than by extension because
+// some PNGs in the collection (e.g. `memorable_instabot_flowchar.png`
+// at ~7 MB) are larger than some GIFs.
+const PRELOAD_BYTE_LIMIT = 500 * 1024;
+
+const sizeFor = async (publicPath: string): Promise<number> => {
+  // `img` is served from /public; resolve it against cwd.
+  const abs = path.join(process.cwd(), 'public', publicPath.replace(/^\//, ''));
+  try {
+    const stat = await fs.stat(abs);
+    return stat.size;
+  } catch {
+    return 0;
+  }
+};
+
+const visible = (await getCollection('projects'))
+  .filter((p) => !p.data.hidden)
+  .sort((a, b) => (a.data.importance ?? 0) - (b.data.importance ?? 0));
+
+// Compute sizes in parallel; unknown files are treated as small.
+const preloaded = (
+  await Promise.all(
+    visible.map(async (p) => ({
+      proj: p,
+      size: await sizeFor(p.data.img),
+    })),
+  )
+).filter(({ size }) => size > 0 && size < PRELOAD_BYTE_LIMIT);
+---
+{preloaded.map(({ proj }, index) => (
+  <link
+    rel="preload"
+    as="image"
+    href={proj.data.img}
+    fetchpriority={index === 0 ? 'high' : 'auto'}
+  />
+))}

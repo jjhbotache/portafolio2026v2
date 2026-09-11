@@ -1,0 +1,761 @@
+---
+import { t, type Lang } from '../../i18n/utils';
+import { getCollection, render } from 'astro:content';
+import { resolve, formatPeriod } from '../../lib/collectionHelpers';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props as Props;
+
+const entries = (await getCollection('experiences'))
+  .sort((a, b) =>  (b.data.importance ?? 0) - (a.data.importance ?? 0));
+
+// Pre-render the bilingual bodies
+const resolved = await Promise.all(
+  entries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return {
+      id: entry.id,
+      data: entry.data,
+      Content,
+    };
+  }),
+);
+---
+<section
+  class="experience bg-experience"
+  data-section="experience"
+  id="experienceDetailedView"
+>
+  <div class="experience-content" data-experience-content>
+    <h2 class="experience__title" data-section-title="experience" data-lang={lang}> {t(lang, 'sections.experience.title')}</h2>
+
+    <div class="experience__viewport" data-experience-viewport>
+      <div class="experience-track experience__track" data-experience-track>
+        {resolved.map((exp, index) => {
+          const title = resolve(exp.data.title, lang);
+          const period = formatPeriod(exp.data.start, exp.data.end, lang);
+          const desc = resolve(exp.data.description, lang);
+          const tech = exp.data.technologies[lang];
+          const toggle = t(lang, 'experience.viewMore');
+          const close = t(lang, 'experience.closeDetail');
+          const empty = t(lang, 'experience.noImages');
+          return (
+            <article
+              class="experience-card experience__card"
+              data-experience-card
+              data-card-id={exp.id}
+              id={`experienceCard-${exp.id}`}
+              data-deferred={index >= 3 ? '' : null}
+            >
+            <div class="experience__card-info">
+              <h3 class="experience__card-title">
+                <span data-lang={lang}>{title}</span>
+              </h3>
+              <div class="experience__card-enterprises">
+                {exp.data.enterprises.map((ent) => {
+                  const name = resolve(ent.name, lang);
+                  return (
+                    <a
+                      href={ent.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="experience__card-enterprise"
+                    >
+                      <img src={ent.logo} alt={name} class="experience__card-enterprise-logo" loading="lazy" />
+                      <span data-lang={lang}>{name}</span>
+                    </a>
+                  );
+                })}
+              </div>
+              <p class="experience__card-period">
+                <span data-lang={lang}>{period}</span>
+              </p>
+              <p class="experience__card-description">
+                <span data-lang={lang}>{desc}</span>
+              </p>
+              <button
+                type="button"
+                class="experience__card-toggle"
+                data-experience-toggle={exp.id}
+                aria-expanded="false"
+              >
+                <span data-lang={lang}>{toggle}...</span>
+              </button>
+            </div>
+
+            <div class="experience__card-slider">
+              {exp.data.imgs.length > 0 ? (
+                <div
+                  class="experience__swiper swiper"
+                  data-experience-swiper
+                  data-card-id={exp.id}
+                >
+                  <div class="swiper-wrapper experience__swiper-wrapper">
+                    {exp.data.imgs.map((src) => (
+                      <div class="swiper-slide experience__swiper-slide">
+                        <img
+                          src={src}
+                          alt={title}
+                          class="experience__swiper-image"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div class={`swiper-pagination experience__swiper-pagination-${exp.id}`}></div>
+                  <div class="swiper-button-prev experience__swiper-nav"></div>
+                  <div class="swiper-button-next experience__swiper-nav"></div>
+                </div>
+              ) : (
+                <div class="experience__card-empty">
+                  <span data-lang={lang}>{empty}</span>
+                </div>
+              )}
+            </div>
+
+            <!-- Detail overlay (technologies + full content). Shown when the
+                 user clicks the .experience__card-toggle. CSS toggles it. -->
+            <div class="experience__card-overlay" data-experience-overlay={exp.id}>
+              <div class="experience__card-overlay-inner">
+                <div class="experience__card-techs">
+                  {tech.map((item, i) => (
+                    <span
+                      class="experience__card-tech"
+                      style={`transition-delay: ${300 + i * 50}ms;`}
+                    >
+                      <span data-lang={lang}>{item}</span>
+                    </span>
+                  ))}
+                </div>
+                <div class="experience__card-content">
+                  {/* Single body — the entry's markdown body is rendered as-is.
+                   * Bilingual content is supplied via frontmatter fields
+                   * (title/description/technologies) which we already render
+                   * in both languages above. The body is the deep-dive text
+                   * and is typically the same in both languages. */}
+                  <exp.Content />
+                </div>
+                <small class="experience__card-close-hint">
+                  <span data-lang={lang}>{close}</span>
+                </small>
+                <button
+                  type="button"
+                  class="experience__card-close"
+                  data-experience-close={exp.id}
+                  aria-label={close}
+                >×</button>
+              </div>
+            </div>
+          </article>
+          );
+        })}
+      </div>
+    </div>
+
+    <div class="experience__controls">
+      <button
+        type="button"
+        class="experience__see-all"
+        data-experience-see-all
+      >
+        <span data-lang={lang}>{t(lang, 'experience.seeAll')}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Spacer that gives the ScrollTrigger enough vertical room to drive
+       the timeline end-to-end. JS keeps its height in sync with the
+       number of cards (one viewport per transition). -->
+  <div id="experienceSpacer" aria-hidden="true"></div>
+</section>
+
+<style>
+  .experience {
+    position: relative;
+    width: 100%;
+    padding: var(--shell-pad-x);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    overflow: hidden;
+    background-image: radial-gradient(at 2.449776481987598% 8.939610039451761%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 1) 0%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 0) 100%), radial-gradient(at 42.03370272534325% 10.152041719077209%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 1) 0%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 0) 100%), radial-gradient(at 46.04150550971183% 10.904597467327616%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 1) 0%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 0) 100%), radial-gradient(at 79.47220125653968% 15.701274245713037%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 1) 0%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 0) 100%), radial-gradient(at 50.25737435670721% 65.23039692548085%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 1) 0%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 0) 100%), radial-gradient(at 53.41672441624726% 55.54325734308681%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 1) 0%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 0) 100%), radial-gradient(at 60.39679220750175% 54.52117458311415%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 1) 0%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 0) 100%), radial-gradient(at 29.300172051601514% 69.45828193884219%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 1) 0%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 0) 100%), radial-gradient(at 22.7472856835806% 50.28007366256123%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 1) 0%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 0) 100%), radial-gradient(at 30.804914779526904% 81.80916251771721%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 1) 0%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 0) 100%), radial-gradient(at 63.397659634261274% 2.4538925275960355%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 1) 0%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 0) 100%), radial-gradient(at 88.18512555399265% 88.39565429407178%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 1) 0%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 0) 100%);
+  }
+
+  /* Pinned content layer. While the user scrolls, ScrollTrigger keeps
+     this element glued to the viewport so only the GSAP timeline
+     progresses. */
+  .experience-content {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+
+  .experience__title {
+    align-self: self-start;
+    font-family: var(--ff-tron);
+    font-size: clamp(2rem, 2vw, 3rem);
+    letter-spacing: 0.05em;
+    color: transparent;
+    background: linear-gradient(to top left, var(--c-primary) 0%, var(--c-secondary) 80%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: var(--ff-pixeloid);
+    z-index: 2;
+  }
+
+
+  .experience__viewport {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    height: 70vh;
+    /* min-height: 380px; */
+    overflow: visible;
+  }
+
+  .experience__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /* overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+     */
+    scrollbar-width: none;
+  }
+  .experience__track::-webkit-scrollbar { display: none; }
+
+  .experience__card {
+    position: absolute;
+    width: clamp(26rem, 70vw, 100%);
+    height: 100%;
+    left: 50%;
+    top: 50%;
+    
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 0.85rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--c-primary) 0%, #0c1f4a 80%);
+    border-radius: 0.2rem;
+    overflow: hidden;
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+    transform-origin: 50% 0%;
+    
+    will-change: transform, opacity;
+  }
+  
+  
+
+  /* Cards flagged as deferred are not part of the initial timeline and
+     stay hidden until the user clicks "see all". Removing the attribute
+     reveals them and triggers a timeline rebuild. */
+  .experience__card[data-deferred] {
+    display: none;
+  }
+
+  .experience__card-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--c-text);
+    overflow: hidden;
+    font:  clamp(0.7rem, 1vw, 0.85rem) var(--ff-geist-pixel);
+  }
+
+  .experience__card-title {
+    margin: 0;
+    font-family: var(--ff-pixeloid);
+    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+    line-height: 1.15;
+  }
+
+  .experience__card-enterprises {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .experience__card-enterprise {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: underline;
+    transition: color var(--t-fast) var(--ease-out);
+  }
+  .experience__card-enterprise:hover { color: var(--c-secondary); }
+
+  .experience__card-enterprise-logo {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    object-fit: cover;
+  }
+
+  .experience__card-period {
+    margin: 0;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+  }
+
+  .experience__card-description {
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.85);
+    max-height: 10vh;
+    overflow-y: auto;
+  }
+
+  .experience__card-toggle {
+    align-self: flex-start;
+    padding: 0;
+    font-family: var(--ff-pixeloid);
+    font-size: 0.65rem;
+    color: var(--c-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity var(--t-fast) var(--ease-out);
+  }
+  .experience__card-toggle:hover { opacity: 0.8; }
+
+  .experience__card-slider {
+    position: relative;
+    border-radius: 0.2rem;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.4);
+    min-height: 10rem;
+  }
+
+  .experience__swiper { width: 100%; height: 100%; }
+  .experience__swiper-wrapper { height: 100%; }
+  .experience__swiper-slide {
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.05), rgba(0,0,0,0.4));
+  }
+  .experience__swiper-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .experience__swiper-nav {
+    color: var(--c-secondary);
+    opacity: 0.35;
+    transition: opacity var(--t-fast) var(--ease-out);
+  }
+  .experience__swiper-nav:hover { opacity: 1; }
+
+  .experience__card-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+  }
+
+  .experience__card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity var(--t-med) var(--ease-out), transform var(--t-med) var(--ease-out);
+    pointer-events: none;
+    z-index: 10;
+    max-height: 70%;
+  }
+  .experience__card.is-expanded .experience__card-overlay {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .experience__card-overlay-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    height: 100%;
+  }
+
+  .experience__card-techs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .experience__card-tech {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(0, 181, 232, 0.15);
+    color: var(--c-secondary);
+    border: 1px solid rgba(0, 181, 232, 0.3);
+    font-size: 0.72rem;
+    opacity: 0;
+    transition: opacity var(--t-fast) var(--ease-out);
+  }
+  .experience__card.is-expanded .experience__card-tech { opacity: 1; }
+
+  .experience__card-content {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.5;
+    overflow-y: auto;
+  }
+  .experience__card-content :global(a) {
+    text-decoration: underline;
+    color: var(--c-secondary);
+  }
+  .experience__card-content :global(strong) { color: var(--c-text); }
+
+  .experience__card-close-hint {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+  }
+
+  .experience__card-close {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--c-text);
+  }
+
+  .experience__controls {
+    display: flex;
+    justify-content: center;
+  }
+
+  .experience__see-all {
+    padding: 0.65rem 1.5rem;
+    border: 1px solid var(--c-secondary);
+    border-radius: 999px;
+    font-family: var(--ff-pixeloid);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-secondary);
+    transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+  }
+  .experience__see-all:hover {
+    background: var(--c-secondary);
+    color: var(--c-bg);
+  }
+
+  /* The spacer exists only to give the ScrollTrigger vertical scroll
+     distance. It carries no visible content. */
+  #experienceSpacer {
+    position: relative;
+    width: 100%;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* ScrollTrigger wraps the pinned element in a fixed-position container.
+     Force it to truly cover the viewport so the pin feels seamless. */
+  :global(.pin-spacer) > .experience-content {
+    width: 100%;
+  }
+
+  /* Cards are absolutely positioned inside the track once GSAP takes
+     over, so we drop the flex layout for them and let GSAP own x/y. */
+  .experience-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  @media (max-width: 768px) {
+    .experience__card {
+      flex: 0 0 min(70vw, 20rem);
+      max-width: 20rem;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+    .experience__viewport { height: 70vh; min-height: 420px; }
+  }
+</style>
+
+<script>
+  import Swiper from 'swiper';
+  import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import 'swiper/css';
+  import 'swiper/css/navigation';
+  import 'swiper/css/pagination';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  interface ExperienceAnimationHandle {
+    timeline: gsap.core.Timeline;
+    scrollTrigger: ScrollTrigger;
+    destroy: () => void;
+  }
+
+  /**
+   * Build the scroll-driven card stack animation.
+   *
+   * Logic ported from the reference snippet, adapted to the existing
+   * markup (`.experience-track` / `.experience-card` / `#experienceSpacer`
+   * / `#experienceDetailedView` / `.experience-content`).
+   *
+   * - One viewport of scroll per card transition.
+   * - Cards after the first start at `x: 100vw` and slide in.
+   * - As each new card enters, the previous stack shifts up-left by
+   *   `STACK_OFFSET_PX`, creating the partial-visible "deck" look.
+   * - The timeline is scrubbed and snapped to per-card labels so the
+   *   user always lands cleanly on a card.
+   */
+  const buildExperienceScroll = (
+    root: HTMLElement,
+  ): ExperienceAnimationHandle | null => {
+    const track = root.querySelector<HTMLElement>('.experience-track');
+    const content = root.querySelector<HTMLElement>('.experience-content');
+    const wrapper = root.querySelector<HTMLElement>('#experienceDetailedView');
+
+    if (!track || !root) return null;
+
+    const cards = Array.from(
+      track.querySelectorAll<HTMLElement>('.experience-card'),
+    ).filter((c) => !c.hasAttribute('data-deferred'));
+    const numCards = cards.length;
+    if (numCards === 0) return null;
+
+
+    const STEP_DURATION = 1;
+    const STACK_OFFSET_PERCENTAGE = 4;
+    const totalDuration = Math.max(0, (numCards - 1) * STEP_DURATION);
+
+    const timeline = gsap.timeline({
+      paused: true,
+      defaults: { ease: 'power2.inOut' },
+    });
+    
+    timeline.set(cards[0], { scale: 1, yPercent: -50, xPercent: -50, opacity: 1 });
+    cards.slice(1).forEach((card) => { timeline.set(card, { xPercent: -50, opacity: 0 })});
+    timeline.addLabel('card-0', 0);
+
+    
+    
+    // // For each new card k (1..N-1):
+    // //   - every visible card shifts up-left by STACK_OFFSET (the deck)
+    // //   - card[k] slides in from the right
+    cards.forEach((_, step) => {
+      if (step === 0) return;
+
+      const segmentTime = (step - 1) * STEP_DURATION;
+
+      cards.slice(0, step).forEach((_, i) => {
+        const animationParams = {
+        scale: 0.9 - 0.05 * (step - i),
+        yPercent: - (50 + STACK_OFFSET_PERCENTAGE * (step - i)),
+        opacity: 0.5,
+        duration: STEP_DURATION,
+        };
+        // card out animation
+        timeline.to(
+          cards[i],
+          animationParams,
+          segmentTime,
+        );
+      });
+
+      timeline.addLabel(`card-${step}`, segmentTime);
+      // card entry animation
+      timeline.to(
+        cards[step],
+        { 
+         scale: 1,
+         yPercent: -50,
+         opacity: 1, duration: STEP_DURATION 
+        },
+        segmentTime,
+      );
+    });
+
+    const getScrollDistance = () => totalDuration * window.innerHeight;
+
+    const st = ScrollTrigger.create({
+      scroller: wrapper ?? undefined,
+      trigger: content ?? undefined,
+      start: 'top top',
+      end: () => `+=${getScrollDistance()}`,
+      scrub: 0.4,
+      // Pin keeps the section glued to the viewport while the timeline
+      // plays. pinSpacing:false stops GSAP from injecting its own
+      // placeholder — #experienceSpacer already provides the scroll
+      // distance the page needs.
+      pin: content ?? true,
+      pinSpacing: false,
+      snap: {
+        snapTo: 'labels',
+        duration: 0.3,
+        ease: 'power1.inOut',
+      },
+      animation: timeline,
+      onRefresh: () => {
+        // Spacer height = scroll distance so the page has enough scroll
+        // room to drive the animation end-to-end.
+        const spacer = document.querySelector<HTMLElement>(
+          '#experienceSpacer',
+        );
+        if (spacer) {
+          spacer.style.height = `${getScrollDistance()}px`;
+        }
+      },
+    });
+
+    // Initial sizing of the spacer (onRefresh handles subsequent updates).
+    const initialSpacer = document.querySelector<HTMLElement>(
+      '#experienceSpacer',
+    );
+    if (initialSpacer) {
+      initialSpacer.style.height = `${getScrollDistance()}px`;
+    }
+
+    return {
+      timeline,
+      scrollTrigger: st,
+      destroy: () => {
+        st.kill();
+        timeline.kill();
+      },
+    };
+  };
+
+  const init = () => {
+    // Swiper decks per card. CSS for look-and-feel lives in the <style> block.
+    document
+      .querySelectorAll<HTMLElement>('[data-experience-swiper]')
+      .forEach((el) => {
+        // Skip swipers inside deferred cards — they are display:none and
+        // Swiper would otherwise try to measure a zero-sized container.
+        if (el.closest('.experience-card[data-deferred]')) return;
+        const cardId = el.getAttribute('data-card-id');
+        if (!cardId) return;
+        new Swiper(el, {
+          modules: [Navigation, Pagination, Autoplay],
+          direction: 'horizontal',
+          loop: true,
+          grabCursor: true,
+          autoplay: { delay: Math.floor(Math.random() * 20_000) + 8000, disableOnInteraction: false },
+          pagination: {
+            el: el.querySelector(
+              `.experience__swiper-pagination-${cardId}`,
+            ) as HTMLElement,
+            clickable: true,
+          },
+          navigation: {
+            prevEl: el.querySelector(
+              '.swiper-button-prev',
+            ) as HTMLElement,
+            nextEl: el.querySelector(
+              '.swiper-button-next',
+            ) as HTMLElement,
+          },
+          observer: true,
+          observeParents: true,
+        });
+      });
+
+    // Scroll-driven card stack. The handle is kept so we can tear it
+    // down and rebuild once the deferred cards are revealed.
+    const root = document.getElementById('experienceDetailedView');
+    let experienceHandle: ExperienceAnimationHandle | null = null;
+    if (root) experienceHandle = buildExperienceScroll(root);
+
+    // "See all" button: unhides every deferred card, rebuilds the
+    // scroll-driven timeline so they join the deck, then hides itself.
+    const seeAllBtn = document.querySelector<HTMLElement>(
+      '[data-experience-see-all]',
+    );
+    seeAllBtn?.addEventListener('click', () => {
+      if (!root) return;
+      const deferred = root.querySelectorAll<HTMLElement>(
+        '.experience-card[data-deferred]',
+      );
+      if (deferred.length === 0) {
+        seeAllBtn.style.display = 'none';
+        return;
+      }
+      deferred.forEach((card) => card.removeAttribute('data-deferred'));
+      experienceHandle?.destroy();
+      experienceHandle = buildExperienceScroll(root);
+      ScrollTrigger.refresh();
+      seeAllBtn.style.display = 'none';
+    });
+
+    // Recompute pin distance on resize / language change so the spacer
+    // stays in sync with `getScrollDistance()`.
+    ScrollTrigger.refresh();
+
+    // Card expand/collapse interactions.
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const toggle = target.closest<HTMLElement>('[data-experience-toggle]');
+      if (toggle) {
+        e.stopPropagation();
+        const id = toggle.getAttribute('data-experience-toggle');
+        document
+          .getElementById(`experienceCard-${id}`)
+          ?.classList.toggle('is-expanded');
+        return;
+      }
+      const close = target.closest<HTMLElement>('[data-experience-close]');
+      if (close) {
+        e.stopPropagation();
+        const id = close.getAttribute('data-experience-close');
+        document
+          .getElementById(`experienceCard-${id}`)
+          ?.classList.remove('is-expanded');
+        return;
+      }
+      const card = target.closest<HTMLElement>(
+        '.experience__card.is-expanded',
+      );
+      if (
+        card &&
+        !target.closest('.experience__card-content') &&
+        !target.closest('.experience__card-overlay')
+      ) {
+        card.classList.remove('is-expanded');
+      }
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+</script>

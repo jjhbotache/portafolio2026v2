@@ -1,0 +1,412 @@
+---
+import MorphIcon from "morphicons/astro";
+import { Code, Globe, House, Menu as MenuIcon, MessageCircle, Rocket, User, X } from "lucide";
+import { t, type Lang } from '../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props as Props;
+
+// Each entry pairs the Lucide icon with the section id used in the
+// markup (`#experienceDetailedView`, `#projects`, …) plus the i18n
+// label. Order matches the on-page flow so the icons morph across the
+// panel in the same sequence the user meets them while scrolling.
+const menuItems = [
+  {
+    id: 'menu-icon-experience',
+    sectionId: 'experienceDetailedView',
+    label: t(lang, 'sections.experience.title'),
+    icon: Rocket,
+  },
+  {
+    id: 'menu-icon-about',
+    sectionId: 'about',
+    label: t(lang, 'sections.about.title'),
+    icon: User,
+  },
+  {
+    id: 'menu-icon-projects',
+    sectionId: 'projects',
+    label: t(lang, 'sections.projects.title'),
+    icon: Code,
+  },
+  {
+    id: 'menu-icon-contact',
+    sectionId: 'contact',
+    label: t(lang, 'sections.contact.title'),
+    icon: MessageCircle,
+  },
+] as const;
+
+const langLabel = t(lang, 'nav.lang.fullLabel');
+const langShort = t(lang, 'nav.lang.shortLabel');
+const toggleLabel = t(lang, 'nav.menu.toggle');
+const homeLabel = t(lang, 'nav.menu.home');
+const homeAria = t(lang, 'nav.menu.homeAria');
+---
+
+<!-- Floating trigger: morphs its icon between Menu and X. The popup
+     itself lives in `#menu-popup` and stays hidden until the button
+     opens it. -->
+<button
+  id="menu-button"
+  type="button"
+  aria-label={toggleLabel}
+  aria-expanded="false"
+  aria-controls="menu-popup"
+  class="menu-trigger"
+>
+  <MorphIcon icon={MenuIcon} id="menu-icon-trigger" label={toggleLabel} class="menu-trigger__icon" />
+</button>
+
+<!-- Popup: a panel anchored top-right, listing the language toggle
+     first (reusing the `data-lang-flip` mechanism from Base.astro so
+     the existing flip handler keeps working untouched) and then the
+     four page sections plus a "back to home" button. Each item carries
+     its own morph-icon so the intro / hover animation can drive them. -->
+<div
+  id="menu-popup"
+  role="menu"
+  aria-labelledby="menu-button"
+  class="menu-popup"
+>
+  <ul class="menu-popup__list">
+    <a href={lang==='es' ? '/en' : '/'}  class="menu-item-link">
+      <li>
+        <button
+          id="menu-item-lang"
+          type="button"
+          role="menuitem"
+          data-lang-flip
+          data-action="toggle-lang"
+          aria-label={t(lang, 'lang.switchTo')}
+          class="menu-item"
+        >
+          <MorphIcon icon={Globe} id="menu-icon-lang" label={langLabel} class="menu-item__icon" />
+          <span class="menu-item__label">{langLabel}</span>
+          <span class="menu-item__code">{langShort}</span>
+        </button>
+      </li>
+    </a>
+    {menuItems.map((item) => (
+      <li>
+        <button
+          id={`menu-item-${item.sectionId}`}
+          type="button"
+          role="menuitem"
+          data-section-target={item.sectionId}
+          class="menu-item"
+        >
+          <MorphIcon icon={item.icon} id={item.id} label={item.label} class="menu-item__icon" />
+          <span class="menu-item__label">{item.label}</span>
+        </button>
+      </li>
+    ))}
+    <li>
+      <button
+        id="menu-item-home"
+        type="button"
+        role="menuitem"
+        data-action="go-home"
+        aria-label={homeAria}
+        class="menu-item menu-item--home"
+      >
+        <MorphIcon icon={House} id="menu-icon-home" label={homeLabel} class="menu-item__icon" />
+        <span class="menu-item__label">{homeLabel}</span>
+      </button>
+    </li>
+  </ul>
+</div>
+
+<script>
+  import { Circle, Code, Globe, House, Menu as MenuIcon, MessageCircle, Rocket, User, X } from "lucide";
+  import type { MorphIconElement } from "morphicons/element";
+
+  // <MorphIcon> registers the <morph-icon> custom element on its own,
+  // so there is no defineMorphIcon() call here.
+
+  const trigger = document.querySelector<HTMLButtonElement>('#menu-button');
+  const popup = document.querySelector<HTMLDivElement>('#menu-popup');
+  const triggerIcon = document.querySelector<MorphIconElement>('#menu-icon-trigger');
+
+  const langIcon = document.querySelector<MorphIconElement>('#menu-icon-lang');
+  const experienceIcon = document.querySelector<MorphIconElement>('#menu-icon-experience');
+  const projectsIcon = document.querySelector<MorphIconElement>('#menu-icon-projects');
+  const contactIcon = document.querySelector<MorphIconElement>('#menu-icon-contact');
+  const aboutIcon = document.querySelector<MorphIconElement>('#menu-icon-about');
+  const homeIcon = document.querySelector<MorphIconElement>('#menu-icon-home');
+
+  let expandedAnimationDone = false;
+
+  // Section + lang morph sequence. Each popup item starts as `Circle`
+  // and morphs into its own glyph so the user sees a single shape
+  // sweep across the panel on first open.
+  const sectionSequence: Array<{
+    el: MorphIconElement | null;
+    icon: typeof Globe;
+  }> = [
+    { el: langIcon, icon: Globe },
+    { el: experienceIcon, icon: Rocket },
+    { el: aboutIcon, icon: User },
+    { el: projectsIcon, icon: Code },
+    { el: contactIcon, icon: MessageCircle },
+    { el: homeIcon, icon: House },
+  ];
+
+  const setExpanded = (expanded: boolean) => {
+    if (!trigger || !popup || !triggerIcon) return;
+    trigger.setAttribute('aria-expanded', String(expanded));
+    // Assigning `icon` on the upgraded <morph-icon> element animates
+    // the morph (matches the morphicons/astro README example).
+    triggerIcon.icon = expanded ? X : MenuIcon;
+    if (expanded) {
+      popup.classList.add('menu-popup--open');
+      // First-time open: morph every section icon in sequence so the
+      // panel reads as a single sweep rather than six static glyphs.
+      if (expandedAnimationDone) return;
+      sectionSequence.forEach((entry) => {
+        if (!entry.el) return;
+        entry.el.icon = Circle;
+      });
+      window.setTimeout(() => {
+        sectionSequence.forEach((entry, i) => {
+          const el = entry.el;
+          if (!el) return;
+          window.setTimeout(() => {
+            // add the class menu-item--active
+            el.closest('.menu-item')?.classList.add('menu-item--active');
+            el.icon = entry.icon;
+            // remove the class menu-item--active after 100ms
+            window.setTimeout(() => {
+              el.closest('.menu-item')?.classList.remove('menu-item--active');
+            }, 300);
+          }, i * 200);
+        });
+        expandedAnimationDone = true;
+      }, 500);
+    } else {
+      popup.classList.remove('menu-popup--open');
+    }
+  };
+
+  if (trigger) {
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      setExpanded(!expanded);
+    });
+  }
+
+  // Click outside (or Escape) closes the popup.
+  document.addEventListener('click', (event) => {
+    if (!trigger || !popup) return;
+    if (trigger.getAttribute('aria-expanded') !== 'true') return;
+    const target = event.target as Node | null;
+    if (!target) return;
+    if (popup.contains(target) || trigger.contains(target)) return;
+    setExpanded(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && trigger?.getAttribute('aria-expanded') === 'true') {
+      setExpanded(false);
+    }
+  });
+
+  // Smoothly scroll the target section into view. We read `getBoundingClientRect`
+  // against the live viewport so layout shifts (lazy-loaded marquees, etc.)
+  // do not leave the scroll off by a few pixels. The html element has
+  // `scroll-behavior: auto` because GSAP owns the main scroll, but a
+  // single explicit `behavior: 'smooth'` here is fine and is what the
+  // user asked for ("cada sección debe scrollear hasta el inicio").
+  const scrollToSection = (sectionId: string) => {
+    const target = document.getElementById(sectionId);
+    if (!target) return;
+    const top = target.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: 'smooth' });
+  };
+
+  // Section buttons: scroll to the matching section and close the menu.
+  const sectionButtons = document.querySelectorAll<HTMLButtonElement>('[data-section-target]');
+  sectionButtons.forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const sectionId = button.dataset.sectionTarget;
+      if (!sectionId) return;
+      setExpanded(false);
+      // Defer the scroll until the popup has started its close
+      // transition so the user sees the menu fold away before the
+      // page starts moving. 50ms is below the close transition (200ms)
+      // but well above a frame, so it feels snappy.
+      window.setTimeout(() => scrollToSection(sectionId), 60);
+    });
+  });
+
+  // "Back to home" button: scroll to the very top of the page. The
+  // splash section is the first thing on the page, so this lands the
+  // user exactly where they started.
+  const homeButton = document.querySelector<HTMLButtonElement>('#menu-item-home');
+  if (homeButton) {
+    homeButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setExpanded(false);
+      window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 60);
+    });
+  }
+</script>
+
+<style>
+  /* ─── trigger ─────────────────────────────────────────────────────── */
+  .menu-trigger {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 100;
+    height: 3rem;
+    min-width: 3rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--c-text);
+    font-family: var(--ff-pixeloid);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background var(--t-fast) var(--ease-out),
+                border-color var(--t-fast) var(--ease-out),
+                box-shadow var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out);
+  }
+  .menu-trigger:hover {
+    background: rgba(51, 51, 51, 0.8);
+    border-color: none;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+    transform: scale(0.95);
+  }
+  .menu-trigger__icon {
+    color: currentColor;
+  }
+
+  /* ─── popup ──────────────────────────────────────────────────────── */
+  .menu-popup {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 95;
+    margin-top: 4rem;
+    min-width: 180px;
+    width: min(28vw, 320px);
+    border-radius: 1rem;
+    background: rgba(8, 12, 24, 0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-family: var(--ff-pixeloid);
+    color: var(--c-text);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out);
+  }
+  .menu-popup--open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .menu-popup__list {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  /* ─── items ──────────────────────────────────────────────────────── */
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.75rem;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+     transition: background var(--t-fast) var(--ease-out),
+                box-shadow var(--t-fast) var(--ease-out),
+                opacity var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out);
+  }
+  
+  .menu-item:hover,
+  .menu-item:focus-visible,
+  .menu-item--active {
+    background: rgba(43, 43, 43, 0.2);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+    opacity: .85;
+    transform: scale(0.98);
+  }
+  
+  
+  .menu-item__icon {
+    color: currentColor;
+    flex-shrink: 0;
+  }
+  .menu-item__label {
+    flex: 1;
+    font-size: 0.95rem;
+  }
+  .menu-item__code {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .menu-item--home {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 0.25rem;
+    padding-top: 0.75rem;
+  }
+
+  /* ─── morph-icon sizing ──────────────────────────────────────────── */
+  morph-icon {
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: currentColor;
+  }
+  @media (min-width: 768px) {
+    morph-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    .menu-item__label {
+      font-size: 1rem;
+    }
+    .menu-trigger {
+      top: 1.5rem;
+      right: 1.5rem;
+    }
+    .menu-popup {
+      top: 1.5rem;
+      right: 1.5rem;
+      margin-top: 4.25rem;
+    }
+  }
+</style>

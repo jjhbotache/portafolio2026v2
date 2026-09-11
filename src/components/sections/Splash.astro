@@ -1,0 +1,263 @@
+---
+import { t, type Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props as Props;
+
+// Each orbiting ball has a unique distance/direction so they all animate the
+// same keyframe but spread across the avatar. The CSS variables are consumed
+// inside `.splash__ball` and the @keyframes orbit-ball definition.
+const balls = [
+  { src: '/js_ball.png',     alt: 'JavaScript',  },
+  { src: '/react_ball.png',  alt: 'React',       },
+  { src: '/py_ball.png',     alt: 'Python',      },
+  { src: '/fastapi_ball.png', alt: 'FastAPI',    },
+];
+---
+<section class="splash" data-section="splash" id="splash">
+  
+  <div class="splash__avatar-wrap" >
+    <img
+      src="/me.png"
+      alt="Pixel art avatar of Juan Jose Huertas"
+      class="splash__avatar"
+      decoding="async"
+      data-splash-avatar
+    />
+    {balls.map((ball,i) => (
+      <img
+        src={ball.src}
+        alt={ball.alt}
+        class="splash__ball"
+        style={`--orbit-delay:${(i * 1.5)+4}s`}
+        loading="lazy"
+        decoding="async"
+      />
+    ))}
+  </div>
+  
+  
+  <div class="splash__inner">
+    <h1 class="splash__name" data-splash-name data-lang={lang}> {t(lang, 'splash.name')} </h1>
+    <p class="splash__profession" data-splash-profession data-lang={lang} data-text= {t(lang, 'splash.profession')}></p>
+  </div>
+</section>
+
+<style>
+  .splash {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--shell-pad-x);
+    background: radial-gradient(ellipse at center, rgba(29, 78, 216, 0.18) 0%, rgba(4, 6, 10, 1) 70%);
+    overflow: hidden;
+  }
+  
+  .splash__avatar-wrap {
+    position: relative;
+    flex-basis: 40%;
+  }
+  
+  .splash__avatar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translate(0, -32%);
+    width: 50vw;
+    image-rendering: pixelated;
+    z-index: 2;
+  }
+  .splash__avatar-glow{
+    filter: drop-shadow(0 0 1.5rem rgba(0, 181, 232, 0.25));
+  }
+  
+  .splash__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    max-width: var(--shell-max);
+    flex-basis: 60%;
+  }
+
+
+
+  /* Each ball sits in the centre of the avatar wrap, then the keyframe
+   * pushes it to its --orbit-dx/dy offset. The z-index flip at 50.01% gives
+   * the illusion that the ball passes *behind* the avatar before swinging
+   * back to the front — same trick as the original snippet. */
+  .splash__ball {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width:  5rem;
+    height: 5rem;
+    pointer-events: none;
+    animation: orbit-ball 7s linear infinite;
+    animation-delay: var(--orbit-delay, 0s);
+    will-change: transform, z-index;
+    filter: drop-shadow(0 0 0.3em rgba(0, 0, 0, 1));
+  }
+
+  @keyframes orbit-ball {
+    0% {
+      transform: translate(-50%, 14vh);
+      z-index: 3;
+      scale: 5;
+    }
+    50% {
+     transform:translate(28vw, 8vh);
+      z-index:3;
+      scale: 1;
+    }
+    50.001% { z-index: 1; }
+    100% {
+      transform: translate(-70vw, -10vh);
+      scale: 0.1;
+    }
+  }
+
+  .splash__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .splash__name {
+    margin: 0;
+    font-family: var(--ff-pixeloid);
+    font-size: clamp(2.2rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.04em;
+    text-shadow:
+      0 0 .1em rgba(0, 181, 232, 0.05),
+      0 0 .1em rgba(139, 92, 246, 0.05),
+      0 0 .1em rgba(0, 181, 232, 0.05);
+    word-break: break-word;
+    
+    text-align: right;
+    
+    color: transparent;
+    background-image: linear-gradient(to bottom right, var(--c-secondary), var(--c-tertiary), var(--c-primary) 80%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+  }
+
+  .splash__profession {
+    margin-right: 1.5rem;
+    font-family: var(--ff-geist-pixel);
+    font-size: clamp(.6rem, 2vh, 1.5rem);
+    color: var(--c-text-dim);
+    letter-spacing: 0.05em;
+    /* italic */
+    font-style: italic;
+  }
+
+
+  .splash__scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--ff-pixeloid);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--c-text-dim);
+  }
+
+  .splash__scroll-arrow {
+    display: inline-block;
+    animation: bounce-down 1.6s var(--ease-out) infinite;
+  }
+
+  @keyframes bounce-down {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50%      { transform: translateY(8px); opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    .splash__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 2rem;
+      padding-top: 4rem;
+    }
+    .splash__avatar-wrap {
+      max-width: 240px;
+    }
+    .splash__scroll-hint { display: none; }
+  }
+</style>
+
+<script>
+  // Splash entry choreography:
+  //   1. avatar fades + slides in
+  //   2. name letters swipe in (one character at a time)
+  //   3. profession writes itself out
+  //   4. tagline fades in
+  // On language change we replace the text content in every data-splash-text
+  // node using the embedded `<template>` dictionaries, then replay the name
+  // and copy animation so the new locale is animated in.
+  import { gsap } from 'gsap';
+  import { TextPlugin } from 'gsap/TextPlugin';
+  
+  gsap.registerPlugin(TextPlugin);
+  
+  
+  const init = () => {
+    
+    const root = document.querySelector<HTMLElement>('[data-section="splash"]');
+    if (!root) return;
+
+
+    const playEntry = () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('[data-splash-avatar]', {
+        xPercent: -100,
+        opacity: 0,
+        ease: "power3.out",
+        duration: 0.5,
+      });
+      tl.from('[data-splash-name]', {
+        clipPath: "inset(100% 0 0 0) ",
+        opacity: 0,
+        yPercent: 100,
+        duration: 2,
+        ease: "power4.out",
+      }, '>-0.3');
+      tl.to('[data-splash-profession]', {
+        text: document.querySelector('[data-splash-profession]')?.getAttribute('data-text') || '',
+        duration: 5,
+        ease: "power4.out",
+      }, '>');
+      // tl.from('[data-splash-avatar] .splash__ball', {
+      //   opacity: 0,
+      //   scale: 0.4,
+      //   duration: 0.6,
+      //   stagger: 0.08,
+      // }, '-=0.6');
+
+
+    };
+
+    playEntry();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+</script>

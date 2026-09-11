@@ -1,0 +1,313 @@
+---
+/*
+ * ScrollProgress
+ * --------------
+ * Horizontal progress bar pinned to the top of the viewport.
+ *
+ * One segment per `[data-section]` element on the page. The width of each
+ * segment is proportional to the vertical range that the section actually
+ * occupies in the document. When GSAP's ScrollTrigger pins a section, it
+ * wraps it in a `.pin-spacer` whose `offsetHeight` is inflated to leave room
+ * for the scrub; we walk up the DOM looking for that wrapper so pinned
+ * sections still get a fair share of the bar.
+ *
+ * A small rAF loop drives a `--progress` custom property on every segment
+ * from 0 → 1 as the user scrolls past it, and toggles `.is-active` on the
+ * segment that currently contains `scrollY`. Pure vanilla — no GSAP needed,
+ * the measurements come from `getBoundingClientRect`-style offsets.
+ */
+---
+
+<nav
+  class="scroll-progress"
+  aria-label="Page scroll progress"
+  data-scroll-progress
+>
+  {/* Segments are injected by the script below. We render an empty shell so
+       the bar already has its fixed height/background from the moment the
+       HTML parses, before JS has had a chance to run. */}
+  <div class="scroll-progress__track" data-progress-track></div>
+</nav>
+
+<style is:global>
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    z-index: 90;
+    pointer-events: none;
+    background: #04060a8c;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  .scroll-progress__track {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scroll-progress__segment {
+    position: relative;
+    overflow: hidden;
+    flex: 1 1 0;
+    min-width: 0;
+    background: #00000059;
+    transition: background var(--t-fast) var(--ease-out);
+    box-shadow: 0 1px 7px rgba(2, 183, 255, 0.1);
+    transition: box-shadow var(--t-slow) var(--ease-out);
+  }
+
+  .scroll-progress__segment.is-active {
+    background: #00000080;
+    box-shadow: 0 1px 7px rgba(2, 183, 255, 0.5);
+  }
+
+  /* Fill bar: pseudo-element translated from -100% to (progress - 100%).
+
+     -progress: 0  →  translateX(-100%) (bar fully hidden to the left)
+     -progress: 1  →  translateX(0%)    (bar fully covering the segment) */
+  .scroll-progress__segment::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--c-primary) 90%, var(--c-primary-deep) 100%);
+    
+    transform: translateX(calc(-100% + (var(--progress, 0) * 100%)));
+    will-change: transform;
+  }
+</style>
+
+<script>
+  // ----- helpers -----------------------------------------------------------
+
+  type Segment = {
+    sectionEl: HTMLElement;
+    el: HTMLDivElement;
+    startPx: number;
+    endPx: number;
+    range: number;
+    flexGrow: number;
+    active: boolean;
+  };
+
+  // Structural type for what we read off each ScrollTrigger. We only need
+  // four fields, so the interface stays loose enough to survive minor GSAP
+  // version bumps without touching this file.
+  type StLike = {
+    trigger: HTMLElement | null;
+    pin?: Element | string | null;
+    start: number;
+    end: number;
+  };
+
+  /**
+   * Return the vertical scroll-range that this section occupies.
+   *
+   * Strategy, in order of preference:
+   *   1. If any ScrollTrigger targets this section AND has `.pin` set,
+   *      use `st.start` / `st.end` - those are the real scroll positions
+   *      in px, already including the scrub distance GSAP reserved. This
+   *      avoids the race where the .pin-spacer hasn't grown to its final
+   *      height yet at boot time.
+   *   2. Walk up the DOM for a `.pin-spacer` (defensive: a trigger may
+   *      have been registered before its pin ref was resolved).
+   *   3. Fall back to the section's own `offsetTop` / `offsetHeight`.
+   */
+  const clamp01 = (n: number): number => (n < 0 ? 0 : n > 1 ? 1 : n);
+
+  const getRange = (
+    sectionEl: HTMLElement,
+    allTriggers: StLike[],
+  ): { startPx: number; endPx: number; range: number } => {
+    const pinned = allTriggers.filter(
+      (st) => st.trigger === sectionEl && st.pin,
+    );
+    if (pinned.length > 0) {
+      const startPx = Math.round(pinned[0].start);
+      const endPx = Math.round(pinned[pinned.length - 1].end);
+      return { startPx, endPx, range: Math.max(1, endPx - startPx) };
+    }
+
+    let node: HTMLElement | null = sectionEl.parentElement;
+    while (node) {
+      if (node.classList && node.classList.contains('pin-spacer')) {
+        const startPx = Math.max(0, Math.round(node.offsetTop));
+        const endPx = Math.max(startPx + 1, Math.round(node.offsetTop + node.offsetHeight));
+        return { startPx, endPx, range: endPx - startPx };
+      }
+      node = node.parentElement;
+    }
+
+    const startPx = Math.max(0, Math.round(sectionEl.offsetTop));
+    const endPx = Math.max(startPx + 1, Math.round(sectionEl.offsetTop + sectionEl.offsetHeight));
+    return { startPx, endPx, range: endPx - startPx };
+  };
+
+  /**
+   * Build a human label for a section: prefers an explicit
+   * `data-progress-label`, falls back to `data-section`, then to `id`,
+   * and capitalizes the result so the aria tooltip reads nicely.
+   */
+  const labelFor = (sectionEl: HTMLElement): string => {
+    const explicit = sectionEl.getAttribute('data-progress-label');
+    const raw = explicit ?? sectionEl.getAttribute('data-section') ?? sectionEl.id ?? 'Section';
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  };
+
+  /**
+   * Snapshot every registered ScrollTrigger into our flat `StLike`. Lazy
+   * import so Astro doesn't bundle GSAP when this component is rendered
+   * on pages that don't use it.
+   */
+  const snapshotTriggers = async (): Promise<StLike[]> => {
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    return ScrollTrigger.getAll().map((st) => ({
+      trigger: (st.trigger ?? null) as HTMLElement | null,
+      pin: st.pin,
+      start: st.start,
+      end: st.end,
+    }));
+  };
+
+  // ----- runtime -----------------------------------------------------------
+
+  const root = document.querySelector<HTMLElement>('[data-scroll-progress]');
+  const track = document.querySelector<HTMLDivElement>('[data-progress-track]');
+
+  if (root && track) {
+    let segments: Segment[] = [];
+    let scrollTriggers: StLike[] = [];
+    let rafId = 0;
+    let rebuildScheduled = false;
+
+    /** (Re)measure every section against the current ScrollTrigger geometry. */
+    const buildSegments = () => {
+      const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-section]'));
+
+      // Drop segments whose section disappeared from the DOM.
+      segments = segments.filter((seg) => {
+        if (sections.includes(seg.sectionEl)) return true;
+        seg.el.remove();
+        return false;
+      });
+
+      const next: Segment[] = [];
+      
+      for (const sectionEl of sections) {
+        const isLastSeg = sectionEl === sections[sections.length - 1];
+        const existing = segments.find((s) => s.sectionEl === sectionEl);
+        const { startPx, endPx, range } = getRange(sectionEl, scrollTriggers);
+        
+        
+        if (existing) {
+          existing.startPx = isLastSeg ? startPx - window.innerHeight : startPx;
+          existing.endPx = isLastSeg ? endPx - window.innerHeight : endPx;
+          existing.range = range;
+          next.push(existing);
+          continue;
+        }
+
+        const el = document.createElement('div');
+        el.className = 'scroll-progress__segment';
+        el.setAttribute('data-progress-label', labelFor(sectionEl));
+        el.setAttribute('aria-hidden', 'true');
+        // Initial fill at the very start of the page; the rAF tick will
+        // correct this on the next frame.
+        el.style.setProperty('--progress', '0');
+        track.appendChild(el);
+
+        next.push({
+          sectionEl,
+          el,
+          startPx,
+          endPx,
+          range,
+          flexGrow: 0,
+          active: false,
+        });
+      }
+      segments = next;
+
+      // Re-distribute the proportional widths. We use flex-grow (not %)
+      // because we want a constant `gap: 2px` between segments and the
+      // browser can round flex values cleanly.
+      const totalRange = segments.reduce((sum, s) => sum + s.range, 0);
+      for (const seg of segments) {
+        const fraction = totalRange > 0 ? seg.range / totalRange : 0;
+        // `Math.max(..., 0.001)` keeps every segment visible even when
+        // its fraction would round down to 0.
+        const grow = Math.max(fraction, 0.001);
+        seg.flexGrow = grow;
+        seg.el.style.flexGrow = String(grow);
+      }
+    };
+
+    const tick = () => {
+      const scrollY = window.scrollY;
+      console.log(scrollY);
+      
+      for (const seg of segments) {
+        const denom = Math.max(1, seg.endPx - seg.startPx);
+        const progress = clamp01((scrollY - seg.startPx) / denom);
+        seg.el.style.setProperty('--progress', String(progress));
+
+        const isActive = scrollY >= seg.startPx && scrollY <= seg.endPx;
+        if (isActive !== seg.active) {
+          seg.active = isActive;
+          seg.el.classList.toggle('is-active', isActive);
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const startTick = () => {
+      if (rafId === 0) rafId = requestAnimationFrame(tick);
+    };
+
+    /**
+     * Coalesce rebuilds. ScrollTrigger fires `refresh` repeatedly during
+     * init (once per trigger, plus the manual one the orchestrator calls
+     * after the lang toggle), so we collapse everything into a single
+     * rAF that rebuilds with the latest snapshot.
+     */
+    const scheduleRebuild = () => {
+      if (rebuildScheduled) return;
+      rebuildScheduled = true;
+      requestAnimationFrame(async () => {
+        rebuildScheduled = false;
+        scrollTriggers = await snapshotTriggers();
+        buildSegments();
+      });
+    };
+
+    const init = async () => {
+      // First measurement uses whatever state is available right now.
+      // ScrollTrigger will also dispatch `refresh` after each trigger
+      // registers, and the global orchestrator dispatches another one
+      // on resize and on lang change - both will trigger a rebuild below.
+      scrollTriggers = await snapshotTriggers();
+      buildSegments();
+      startTick();
+
+      // Subscribe to ScrollTrigger's global `refresh` event. Official
+      // recommended path for tooling that needs to react to layout
+      // changes (see ScrollTrigger docs -> addEventListener).
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      ScrollTrigger.addEventListener('refresh', scheduleRebuild);
+
+      // Cover the slow path where fonts/images load after the first
+      // refresh and shift heights before any resize event has fired.
+      window.addEventListener('load', scheduleRebuild);
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      init();
+    }
+  }
+</script>

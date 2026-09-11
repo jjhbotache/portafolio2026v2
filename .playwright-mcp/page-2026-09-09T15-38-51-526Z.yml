@@ -1,0 +1,638 @@
+- generic [active] [ref=f7e1]:
+  - button "Menú" [ref=f7e2] [cursor=pointer]:
+    - img "Menú" [ref=f7e4]
+  - menu "Menú":
+    - list:
+      - listitem:
+        - menuitem "EN":
+          - generic:
+            - img "Idioma"
+          - generic: Idioma
+          - generic: ES
+      - listitem:
+        - menuitem "Mi experiencia Mi experiencia":
+          - generic:
+            - img "Mi experiencia"
+          - generic: Mi experiencia
+      - listitem:
+        - menuitem "Mis proyectos Mis proyectos":
+          - generic:
+            - img "Mis proyectos"
+          - generic: Mis proyectos
+      - listitem:
+        - menuitem "Contacto Contacto":
+          - generic:
+            - img "Contacto"
+          - generic: Contacto
+      - listitem:
+        - menuitem "Sobre mí Sobre mí":
+          - generic:
+            - img "Sobre mí"
+          - generic: Sobre mí
+      - listitem:
+        - menuitem "Volver al inicio":
+          - generic:
+            - img "Inicio"
+          - generic: Inicio
+  - navigation "Page scroll progress"
+  - main [ref=f7e6]:
+    - generic [ref=f7e7]:
+      - generic:
+        - img "Pixel art avatar of Juan Jose Huertas" [ref=f7e8]
+        - img "JavaScript"
+        - img "React"
+        - img "Python"
+        - img "FastAPI"
+      - generic [ref=f7e9]:
+        - heading "Juan Jose Huertas" [level=1] [ref=f7e10]
+        - paragraph
+    - generic [ref=f7e13]:
+      - heading "Mi experiencia" [level=2] [ref=f7e14]
+      - generic [ref=f7e16]:
+        - article [ref=f7e17]:
+          - generic [ref=f7e18]:
+            - heading "JURIESCAN API multiservicios" [level=3] [ref=f7e19]
+            - link "Consultec Consultec" [ref=f7e21] [cursor=pointer]:
+              - /url: https://consultec.com.co/
+              - img "Consultec" [ref=f7e22]
+              - generic [ref=f7e23]: Consultec
+            - paragraph [ref=f7e24]: ago 2025 — dic 2025
+            - paragraph [ref=f7e25]: Diseño y desarrollo de la API multiservicios de Juriescan, con funcionalidades para acceder a información sobre procesos judiciales y checkeo en redes sociales con uso de la API de OpenAI.
+            - button "Ver más..." [ref=f7e26] [cursor=pointer]
+          - generic [ref=f7e28]:
+            - generic [ref=f7e29]:
+              - img "JURIESCAN API multiservicios" [ref=f7e31]
+              - img "JURIESCAN API multiservicios" [ref=f7e33]
+            - generic [ref=f7e34]:
+              - generic [ref=f7e35] [cursor=pointer]
+              - generic [ref=f7e36] [cursor=pointer]
+            - generic [ref=f7e37] [cursor=pointer]: prev
+            - generic [ref=f7e38] [cursor=pointer]: next
+          - generic:
+            - generic:
+              - generic:
+                - generic: FastAPI
+                - generic: OpenAI API
+                - generic: Playwright
+                - generic: Supabase
+                - generic: Docker
+                - generic: Python
+                - generic: PostgreSQL
+                - generic: SQLAlchemy
+              - generic:
+                - paragraph: Placeholder. Reemplaza con la descripción completa del proyecto en markdown.
+              - generic: Cerrar detalle
+              - button "Cerrar detalle": ×
+        - article [ref=f7e39]:
+          - generic [ref=f7e40]:
+            - heading "Profesor en Algonova latinoamérica" [level=3] [ref=f7e41]
+            - link "Algonova Algonova" [ref=f7e43] [cursor=pointer]:
+              - /url: https://algonova.lat/
+              - img "Algonova" [ref=f7e44]
+              - generic [ref=f7e45]: Algonova
+            - paragraph [ref=f7e46]: oct 2025 — Actualidad
+            - paragraph [ref=f7e47]: Enseñanza de python y scratch a estudiantes de secundaria y preparatoria en Algonova latinoamérica, una plataforma educativa, enfocándose en conceptos de programación, resolución de problemas y desarrollo de proyectos prácticos.
+            - button "Ver más..." [ref=f7e48] [cursor=pointer]
+          - generic [ref=f7e50]:
+            - generic [ref=f7e51]:
+              - img "Profesor en Algonova latinoamérica" [ref=f7e53]
+              - img "Profesor en Algonova latinoamérica" [ref=f7e55]
+            - generic [ref=f7e56]:
+              - generic [ref=f7e57] [cursor=pointer]
+              - generic [ref=f7e58] [cursor=pointer]
+            - generic [ref=f7e59] [cursor=pointer]: prev
+            - generic [ref=f7e60] [cursor=pointer]: next
+          - generic:
+            - generic:
+              - generic:
+                - generic: Python
+                - generic: Scratch
+              - generic:
+                - paragraph: Placeholder. Reemplaza con la descripción completa del proyecto en markdown.
+              - generic: Cerrar detalle
+              - button "Cerrar detalle": ×
+        - article [ref=f7e61]:
+          - generic [ref=f7e62]:
+            - heading "Diseño a la medida de Ginia" [level=3] [ref=f7e63]
+            - generic [ref=f7e64]:
+              - link "Remedia Remedia" [ref=f7e65] [cursor=pointer]:
+                - /url: https://www.remedia.mx/
+                - img "Remedia" [ref=f7e66]
+                - generic [ref=f7e67]: Remedia
+              - link "Ginia Ginia" [ref=f7e68] [cursor=pointer]:
+                - /url: https://www.ginia.io/
+                - img "Ginia" [ref=f7e69]
+                - generic [ref=f7e70]: Ginia
+            - paragraph [ref=f7e71]: oct 2025 — oct 2025
+            - paragraph [ref=f7e72]: Desarrollo de landing page para Ginia dado un diseño detallado con animaciones y optimización para dispositivos móviles y tabletas.
+            - button "Ver más..." [ref=f7e73] [cursor=pointer]
+          - generic [ref=f7e75]:
+            - generic [ref=f7e76]:
+              - img "Diseño a la medida de Ginia" [ref=f7e78]
+              - img "Diseño a la medida de Ginia" [ref=f7e80]
+              - img "Diseño a la medida de Ginia" [ref=f7e82]
+              - img "Diseño a la medida de Ginia" [ref=f7e84]
+            - generic [ref=f7e85]:
+              - generic [ref=f7e86] [cursor=pointer]
+              - generic [ref=f7e87] [cursor=pointer]
+              - generic [ref=f7e88] [cursor=pointer]
+              - generic [ref=f7e89] [cursor=pointer]
+            - generic [ref=f7e90] [cursor=pointer]: prev
+            - generic [ref=f7e91] [cursor=pointer]: next
+          - generic:
+            - generic:
+              - generic:
+                - generic: React
+                - generic: Motion
+                - generic: CSS
+              - generic:
+                - paragraph: Placeholder. Reemplaza con la descripción completa del proyecto en markdown.
+              - generic: Cerrar detalle
+              - button "Cerrar detalle": ×
+        - text: prev next prev next prev next
+      - button "Ver todas las experiencias" [ref=f7e93] [cursor=pointer]
+    - generic [ref=f7e94]:
+      - generic [ref=f7e95]:
+        - generic [ref=f7e98]:
+          - link "JavaScript" [ref=f7e99] [cursor=pointer]:
+            - /url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+            - img "JavaScript" [ref=f7e100]
+          - link "React" [ref=f7e102] [cursor=pointer]:
+            - /url: https://react.dev
+            - img "React" [ref=f7e103]
+          - link "Astro" [ref=f7e105] [cursor=pointer]:
+            - /url: https://astro.build
+            - img "Astro" [ref=f7e106]
+          - link "React Native" [ref=f7e108] [cursor=pointer]:
+            - /url: https://reactnative.dev
+            - img "React Native" [ref=f7e109]
+          - link "Redux Toolkit" [ref=f7e111] [cursor=pointer]:
+            - /url: https://redux.js.org
+            - img "Redux Toolkit" [ref=f7e112]
+          - link "Styled Components" [ref=f7e114] [cursor=pointer]:
+            - /url: https://styled-components.com
+            - img "Styled Components" [ref=f7e115]
+          - link "React Router" [ref=f7e117] [cursor=pointer]:
+            - /url: https://reactrouter.com
+            - img "React Router" [ref=f7e118]
+          - link "Framer Motion" [ref=f7e120] [cursor=pointer]:
+            - /url: https://www.framer.com/motion
+            - img "Framer Motion" [ref=f7e121]
+          - link "Bootstrap" [ref=f7e123] [cursor=pointer]:
+            - /url: https://getbootstrap.com
+            - img "Bootstrap" [ref=f7e124]
+          - link "Expo" [ref=f7e126] [cursor=pointer]:
+            - /url: https://expo.io
+            - img "Expo" [ref=f7e127]
+          - link "Recharts" [ref=f7e129] [cursor=pointer]:
+            - /url: https://recharts.org
+            - img "Recharts" [ref=f7e130]
+          - link "Vite" [ref=f7e132] [cursor=pointer]:
+            - /url: https://vitejs.dev
+            - img "Vite" [ref=f7e133]
+          - link "TypeScript" [ref=f7e135] [cursor=pointer]:
+            - /url: https://www.typescriptlang.org
+            - img "TypeScript" [ref=f7e136]
+          - link "Three.js" [ref=f7e138] [cursor=pointer]:
+            - /url: https://threejs.org
+            - img "Three.js" [ref=f7e139]
+          - link "React Native Elements" [ref=f7e141] [cursor=pointer]:
+            - /url: https://reactnativeelements.com
+            - img "React Native Elements" [ref=f7e142]
+          - link "Tailwind CSS" [ref=f7e144] [cursor=pointer]:
+            - /url: https://tailwindcss.com
+            - img "Tailwind CSS" [ref=f7e145]
+          - link "JavaScript" [ref=f7e147] [cursor=pointer]:
+            - /url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+            - img "JavaScript" [ref=f7e148]
+          - link "React" [ref=f7e150] [cursor=pointer]:
+            - /url: https://react.dev
+            - img "React" [ref=f7e151]
+          - link "Astro" [ref=f7e153] [cursor=pointer]:
+            - /url: https://astro.build
+            - img "Astro" [ref=f7e154]
+          - link "React Native" [ref=f7e156] [cursor=pointer]:
+            - /url: https://reactnative.dev
+            - img "React Native" [ref=f7e157]
+          - link "Redux Toolkit" [ref=f7e159] [cursor=pointer]:
+            - /url: https://redux.js.org
+            - img "Redux Toolkit" [ref=f7e160]
+          - link "Styled Components" [ref=f7e162] [cursor=pointer]:
+            - /url: https://styled-components.com
+            - img "Styled Components" [ref=f7e163]
+          - link "React Router" [ref=f7e165] [cursor=pointer]:
+            - /url: https://reactrouter.com
+            - img "React Router" [ref=f7e166]
+          - link "Framer Motion" [ref=f7e168] [cursor=pointer]:
+            - /url: https://www.framer.com/motion
+            - img "Framer Motion" [ref=f7e169]
+          - link "Bootstrap" [ref=f7e171] [cursor=pointer]:
+            - /url: https://getbootstrap.com
+            - img "Bootstrap" [ref=f7e172]
+          - link "Expo" [ref=f7e174] [cursor=pointer]:
+            - /url: https://expo.io
+            - img "Expo" [ref=f7e175]
+          - link "Recharts" [ref=f7e177] [cursor=pointer]:
+            - /url: https://recharts.org
+            - img "Recharts" [ref=f7e178]
+          - link "Vite" [ref=f7e180] [cursor=pointer]:
+            - /url: https://vitejs.dev
+            - img "Vite" [ref=f7e181]
+          - link "TypeScript" [ref=f7e183] [cursor=pointer]:
+            - /url: https://www.typescriptlang.org
+            - img "TypeScript" [ref=f7e184]
+          - link "Three.js" [ref=f7e186] [cursor=pointer]:
+            - /url: https://threejs.org
+            - img "Three.js" [ref=f7e187]
+          - link "React Native Elements" [ref=f7e189] [cursor=pointer]:
+            - /url: https://reactnativeelements.com
+            - img "React Native Elements" [ref=f7e190]
+          - link "Tailwind CSS" [ref=f7e192] [cursor=pointer]:
+            - /url: https://tailwindcss.com
+            - img "Tailwind CSS" [ref=f7e193]
+        - generic [ref=f7e197]:
+          - link "Firebase" [ref=f7e198] [cursor=pointer]:
+            - /url: https://firebase.google.com
+            - img "Firebase" [ref=f7e199]
+          - link "Python" [ref=f7e201] [cursor=pointer]:
+            - /url: https://www.python.org
+            - img "Python" [ref=f7e202]
+          - link "Flask" [ref=f7e204] [cursor=pointer]:
+            - /url: https://flask.palletsprojects.com
+            - img "Flask" [ref=f7e205]
+          - link "FastAPI" [ref=f7e207] [cursor=pointer]:
+            - /url: https://fastapi.tiangolo.com
+            - img "FastAPI" [ref=f7e208]
+          - link "phpMyAdmin" [ref=f7e210] [cursor=pointer]:
+            - /url: https://www.phpmyadmin.net
+            - img "phpMyAdmin" [ref=f7e211]
+          - link "SQLite" [ref=f7e213] [cursor=pointer]:
+            - /url: https://www.sqlite.org
+            - img "SQLite" [ref=f7e214]
+          - link "AWS Cognito" [ref=f7e216] [cursor=pointer]:
+            - /url: https://aws.amazon.com/cognito
+            - img "AWS Cognito" [ref=f7e217]
+          - link "Beautiful Soup" [ref=f7e219] [cursor=pointer]:
+            - /url: https://www.crummy.com/software/BeautifulSoup
+            - img "Beautiful Soup" [ref=f7e220]
+          - link "PyWebView" [ref=f7e222] [cursor=pointer]:
+            - /url: https://pywebview.flowrl.com
+            - img "PyWebView" [ref=f7e223]
+          - link "Selenium" [ref=f7e225] [cursor=pointer]:
+            - /url: https://selenium-python.readthedocs.io
+            - img "Selenium" [ref=f7e226]
+          - link "PostgreSQL" [ref=f7e228] [cursor=pointer]:
+            - /url: https://www.postgresql.org
+            - img "PostgreSQL" [ref=f7e229]
+          - link "Firebase" [ref=f7e231] [cursor=pointer]:
+            - /url: https://firebase.google.com
+            - img "Firebase" [ref=f7e232]
+          - link "Python" [ref=f7e234] [cursor=pointer]:
+            - /url: https://www.python.org
+            - img "Python" [ref=f7e235]
+          - link "Flask" [ref=f7e237] [cursor=pointer]:
+            - /url: https://flask.palletsprojects.com
+            - img "Flask" [ref=f7e238]
+          - link "FastAPI" [ref=f7e240] [cursor=pointer]:
+            - /url: https://fastapi.tiangolo.com
+            - img "FastAPI" [ref=f7e241]
+          - link "phpMyAdmin" [ref=f7e243] [cursor=pointer]:
+            - /url: https://www.phpmyadmin.net
+            - img "phpMyAdmin" [ref=f7e244]
+          - link "SQLite" [ref=f7e246] [cursor=pointer]:
+            - /url: https://www.sqlite.org
+            - img "SQLite" [ref=f7e247]
+          - link "AWS Cognito" [ref=f7e249] [cursor=pointer]:
+            - /url: https://aws.amazon.com/cognito
+            - img "AWS Cognito" [ref=f7e250]
+          - link "Beautiful Soup" [ref=f7e252] [cursor=pointer]:
+            - /url: https://www.crummy.com/software/BeautifulSoup
+            - img "Beautiful Soup" [ref=f7e253]
+          - link "PyWebView" [ref=f7e255] [cursor=pointer]:
+            - /url: https://pywebview.flowrl.com
+            - img "PyWebView" [ref=f7e256]
+          - link "Selenium" [ref=f7e258] [cursor=pointer]:
+            - /url: https://selenium-python.readthedocs.io
+            - img "Selenium" [ref=f7e259]
+          - link "PostgreSQL" [ref=f7e261] [cursor=pointer]:
+            - /url: https://www.postgresql.org
+            - img "PostgreSQL" [ref=f7e262]
+        - generic [ref=f7e266]:
+          - link "Django" [ref=f7e267] [cursor=pointer]:
+            - /url: https://www.djangoproject.com
+            - img "Django" [ref=f7e268]
+          - link "Git" [ref=f7e270] [cursor=pointer]:
+            - /url: https://git-scm.com
+            - img "Git" [ref=f7e271]
+          - link "GitHub" [ref=f7e273] [cursor=pointer]:
+            - /url: https://github.com
+            - img "GitHub" [ref=f7e274]
+          - link "GCP" [ref=f7e276] [cursor=pointer]:
+            - /url: https://cloud.google.com
+            - img "GCP" [ref=f7e277]
+          - link "JWT" [ref=f7e279] [cursor=pointer]:
+            - /url: https://jwt.io
+            - img "JWT" [ref=f7e280]
+          - link "PayPal" [ref=f7e282] [cursor=pointer]:
+            - /url: https://www.paypal.com
+            - img "PayPal" [ref=f7e283]
+          - link "Cloudinary" [ref=f7e285] [cursor=pointer]:
+            - /url: https://cloudinary.com
+            - img "Cloudinary" [ref=f7e286]
+          - link "Copilot" [ref=f7e288] [cursor=pointer]:
+            - /url: https://github.com/features/copilot
+            - img "Copilot" [ref=f7e289]
+          - link "Google Gemini" [ref=f7e291] [cursor=pointer]:
+            - /url: https://ai.google.dev/gemini-api
+            - img "Google Gemini" [ref=f7e292]
+          - link "Django" [ref=f7e294] [cursor=pointer]:
+            - /url: https://www.djangoproject.com
+            - img "Django" [ref=f7e295]
+          - link "Git" [ref=f7e297] [cursor=pointer]:
+            - /url: https://git-scm.com
+            - img "Git" [ref=f7e298]
+          - link "GitHub" [ref=f7e300] [cursor=pointer]:
+            - /url: https://github.com
+            - img "GitHub" [ref=f7e301]
+          - link "GCP" [ref=f7e303] [cursor=pointer]:
+            - /url: https://cloud.google.com
+            - img "GCP" [ref=f7e304]
+          - link "JWT" [ref=f7e306] [cursor=pointer]:
+            - /url: https://jwt.io
+            - img "JWT" [ref=f7e307]
+          - link "PayPal" [ref=f7e309] [cursor=pointer]:
+            - /url: https://www.paypal.com
+            - img "PayPal" [ref=f7e310]
+          - link "Cloudinary" [ref=f7e312] [cursor=pointer]:
+            - /url: https://cloudinary.com
+            - img "Cloudinary" [ref=f7e313]
+          - link "Copilot" [ref=f7e315] [cursor=pointer]:
+            - /url: https://github.com/features/copilot
+            - img "Copilot" [ref=f7e316]
+          - link "Google Gemini" [ref=f7e318] [cursor=pointer]:
+            - /url: https://ai.google.dev/gemini-api
+            - img "Google Gemini" [ref=f7e319]
+      - heading "Soy un desarrollador apasionado por la tecnología y el software. Me encanta simplificar la vida mediante la tecnología y sus mejores prácticas." [level=2] [ref=f7e322]
+      - generic [ref=f7e323]:
+        - img "Juan Jose Huertas avatar" [ref=f7e324]
+        - paragraph [ref=f7e325]: Es por eso que me he especializado en Javascript y Python, tecnologías con las que el desarrollo soluciones para la mayoría de problemas es posible.
+        - generic [ref=f7e326]:
+          - img "JavaScript" [ref=f7e327]
+          - img "React" [ref=f7e328]
+          - img "FastAPI" [ref=f7e329]
+          - img "Python" [ref=f7e330]
+    - generic [ref=f7e331]:
+      - heading "Mis proyectos" [level=2] [ref=f7e332]
+      - generic [ref=f7e333]:
+        - generic [ref=f7e335]:
+          - article [ref=f7e336]:
+            - link [ref=f7e337] [cursor=pointer]:
+              - /url: "#"
+              - img "Iphone 4s api" [ref=f7e338]
+            - generic [ref=f7e339]:
+              - heading "Iphone 4s api" [level=3] [ref=f7e340]
+              - paragraph [ref=f7e341]: ¿Correr un servidor en un Iphone 4s? Claro que sí!. Este proyecto se enfocó en crear un servidor en un Iphone 4s usando python 2.5.1 y las librerias que vienen por defecto con este python. El servidor es capaz de manejar bases de datos sqlite y guardar archivos de los cuales se les puede cambiar la visibilidad.
+              - generic [ref=f7e342]:
+                - generic [ref=f7e343]: Python
+                - generic [ref=f7e344]: SQLite
+                - generic [ref=f7e345]: HTML
+              - link "Repositorio" [ref=f7e347] [cursor=pointer]:
+                - /url: https://github.com/jjhbotache/iphone_api
+            - text: Ver el proyecto
+          - article [ref=f7e348]:
+            - link [ref=f7e349] [cursor=pointer]:
+              - /url: "#"
+              - img "NetflixClone Clone" [ref=f7e350]
+            - generic [ref=f7e351]:
+              - heading "NetflixClone Clone" [level=3] [ref=f7e352]
+              - paragraph [ref=f7e353]: Este es un clon de la pagina web de Netflix. La app simula el login y registro de usuarios utilizando AWS Cognito o Google, permite el pago de la suscripción utilizando Paypal y almacena la información de los usuarios en Firebase.
+              - generic [ref=f7e354]:
+                - generic [ref=f7e355]: React
+                - generic [ref=f7e356]: Paypal
+                - generic [ref=f7e357]: Firebase
+                - generic [ref=f7e358]: GCP
+              - generic [ref=f7e359]:
+                - link "Repositorio" [ref=f7e360] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/netflixClone
+                - link "Demo" [ref=f7e361] [cursor=pointer]:
+                  - /url: https://netflix-clone-beta-seven-55.vercel.app/
+            - text: Ver el proyecto
+          - article [ref=f7e362]:
+            - link [ref=f7e363] [cursor=pointer]:
+              - /url: "#"
+              - img "EasySite" [ref=f7e364]
+            - generic [ref=f7e365]:
+              - heading "EasySite" [level=3] [ref=f7e366]
+              - paragraph [ref=f7e367]: EasySite es una plataforma que permite a las empresas crear, administrar y personalizar páginas web simples. Con un enfoque minimalista pero funcional, provee herramientas intuitivas para la creación de contenido, gestión de citas y contacto con clientes. El administrador global gestiona todas las empresas, mientras que cada empresa dispone de un panel limitado para personalizar su web y administrar su agenda.
+              - generic [ref=f7e368]:
+                - generic [ref=f7e369]: Django
+                - generic [ref=f7e370]: Tailwind CSS
+                - generic [ref=f7e371]: Postgres SQL
+              - generic [ref=f7e372]:
+                - link "Repositorio" [ref=f7e373] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/easy-site
+                - link "Demo" [ref=f7e374] [cursor=pointer]:
+                  - /url: http://easy-site.onrender.com
+            - text: Ver el proyecto
+          - article [ref=f7e375]:
+            - link [aria-hidden] [ref=f7e376] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e377]:
+              - heading "Iphone 4s api" [level=3] [ref=f7e378]
+              - paragraph [ref=f7e379]: ¿Correr un servidor en un Iphone 4s? Claro que sí!. Este proyecto se enfocó en crear un servidor en un Iphone 4s usando python 2.5.1 y las librerias que vienen por defecto con este python. El servidor es capaz de manejar bases de datos sqlite y guardar archivos de los cuales se les puede cambiar la visibilidad.
+            - text: Ver el proyecto
+          - article [ref=f7e380]:
+            - link [aria-hidden] [ref=f7e381] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e382]:
+              - heading "NetflixClone Clone" [level=3] [ref=f7e383]
+              - paragraph [ref=f7e384]: Este es un clon de la pagina web de Netflix. La app simula el login y registro de usuarios utilizando AWS Cognito o Google, permite el pago de la suscripción utilizando Paypal y almacena la información de los usuarios en Firebase.
+            - text: Ver el proyecto
+          - article [ref=f7e385]:
+            - link [aria-hidden] [ref=f7e386] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e387]:
+              - heading "EasySite" [level=3] [ref=f7e388]
+              - paragraph [ref=f7e389]: EasySite es una plataforma que permite a las empresas crear, administrar y personalizar páginas web simples. Con un enfoque minimalista pero funcional, provee herramientas intuitivas para la creación de contenido, gestión de citas y contacto con clientes. El administrador global gestiona todas las empresas, mientras que cada empresa dispone de un panel limitado para personalizar su web y administrar su agenda.
+            - text: Ver el proyecto
+        - generic [ref=f7e391]:
+          - article [ref=f7e392]:
+            - link [ref=f7e393] [cursor=pointer]:
+              - /url: "#"
+              - img "Disney+ Clone" [ref=f7e394]
+            - generic [ref=f7e395]:
+              - heading "Disney+ Clone" [level=3] [ref=f7e396]
+              - paragraph [ref=f7e397]: Este proyecto se enfocó en hacer una réplica de la página de Disney+ exactamente igual (pixel perfect) utilizando las tecnologías más básicas (HTML y CSS). Se evitó adrede el uso de cualquier tipo de librería u hojas de estilos existentes y se construyó bajo la metodología BEM para dar orden al nombramiento de clases CSS.
+              - generic [ref=f7e398]:
+                - generic [ref=f7e399]: HTML
+                - generic [ref=f7e400]: CSS
+                - generic [ref=f7e401]: BEM methodology
+              - generic [ref=f7e402]:
+                - link "Repositorio" [ref=f7e403] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/disney_page
+                - link "Demo" [ref=f7e404] [cursor=pointer]:
+                  - /url: https://jjhbotache.github.io/disney_page/
+            - text: Ver el proyecto
+          - article [ref=f7e405]:
+            - link [ref=f7e406] [cursor=pointer]:
+              - /url: "#"
+              - img "Memorable3" [ref=f7e407]
+            - generic [ref=f7e408]:
+              - heading "Memorable3" [level=3] [ref=f7e409]
+              - paragraph [ref=f7e410]: Este es Memorable, realizado por 3ra vez. Este proyecto utiliza react.js, fastAPI y postgres SQL. Permite a los usuarios buscar el diseño que buscan, con facilidad, ya que se dispone de filtro por etiquetas, buscador por palabras y mas interesante, sugerencias generadas por IA. Los usuarios pueden registrarse y guardar los diseños que les gusten, para luego verlos en sus favoritos. En cuanto a la administración, se puede gestionar los diseños, los tags y en general, la info de la página.
+              - generic [ref=f7e411]:
+                - generic [ref=f7e412]: React
+                - generic [ref=f7e413]: Typescript
+                - generic [ref=f7e414]: Redux Toolkit
+                - generic [ref=f7e415]: Framer motion
+              - generic [ref=f7e416]:
+                - link "Repositorio (Frontend)" [ref=f7e417] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/memorable_3_front
+                - link "Repositorio (Backend)" [ref=f7e418] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/memorable_3_back
+                - link "Demo" [ref=f7e419] [cursor=pointer]:
+                  - /url: https://vinos-memorable.vercel.app/
+            - text: Ver el proyecto
+          - article [ref=f7e420]:
+            - link [ref=f7e421] [cursor=pointer]:
+              - /url: "#"
+              - img "Instagram follower bot" [ref=f7e422]
+            - generic [ref=f7e423]:
+              - heading "Instagram follower bot" [level=3] [ref=f7e424]
+              - paragraph [ref=f7e425]: Este es un proyecto muy interesante, ya que se trata de un bot que sigue a los seguidores de una cuenta de Instagram. Dadas unas cuentas objetivo, el bot sigue a los seguidores de estas cuentas, con un criterio que se puede configurar. Ya que Instagram tiene ciertas restricciones, el bot, aleatoriamente revisa el feed de instagram y tambien la mira con criterio, ignorando el contenido que no cumpla con el criterio. Los criterios son evaluados mediante IA, para tener un feed personalizado y seguir cuentas idoneas.
+              - generic [ref=f7e426]:
+                - generic [ref=f7e427]: GCP
+                - generic [ref=f7e428]: Python
+                - generic [ref=f7e429]: Selenium
+                - generic [ref=f7e430]: Google gemini
+              - link "Repositorio" [ref=f7e432] [cursor=pointer]:
+                - /url: https://github.com/jjhbotache/memorable_insta_bot
+            - text: Ver el proyecto
+          - article [ref=f7e433]:
+            - link [aria-hidden] [ref=f7e434] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e435]:
+              - heading "Disney+ Clone" [level=3] [ref=f7e436]
+              - paragraph [ref=f7e437]: Este proyecto se enfocó en hacer una réplica de la página de Disney+ exactamente igual (pixel perfect) utilizando las tecnologías más básicas (HTML y CSS). Se evitó adrede el uso de cualquier tipo de librería u hojas de estilos existentes y se construyó bajo la metodología BEM para dar orden al nombramiento de clases CSS.
+            - text: Ver el proyecto
+          - article [ref=f7e438]:
+            - link [aria-hidden] [ref=f7e439] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e440]:
+              - heading "Memorable3" [level=3] [ref=f7e441]
+              - paragraph [ref=f7e442]: Este es Memorable, realizado por 3ra vez. Este proyecto utiliza react.js, fastAPI y postgres SQL. Permite a los usuarios buscar el diseño que buscan, con facilidad, ya que se dispone de filtro por etiquetas, buscador por palabras y mas interesante, sugerencias generadas por IA. Los usuarios pueden registrarse y guardar los diseños que les gusten, para luego verlos en sus favoritos. En cuanto a la administración, se puede gestionar los diseños, los tags y en general, la info de la página.
+            - text: Ver el proyecto
+          - article [ref=f7e443]:
+            - link [aria-hidden] [ref=f7e444] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e445]:
+              - heading "Instagram follower bot" [level=3] [ref=f7e446]
+              - paragraph [ref=f7e447]: Este es un proyecto muy interesante, ya que se trata de un bot que sigue a los seguidores de una cuenta de Instagram. Dadas unas cuentas objetivo, el bot sigue a los seguidores de estas cuentas, con un criterio que se puede configurar. Ya que Instagram tiene ciertas restricciones, el bot, aleatoriamente revisa el feed de instagram y tambien la mira con criterio, ignorando el contenido que no cumpla con el criterio. Los criterios son evaluados mediante IA, para tener un feed personalizado y seguir cuentas idoneas.
+            - text: Ver el proyecto
+        - generic [ref=f7e449]:
+          - article [ref=f7e450]:
+            - link [ref=f7e451] [cursor=pointer]:
+              - /url: "#"
+              - img "Chattus" [ref=f7e452]
+            - generic [ref=f7e453]:
+              - heading "Chattus" [level=3] [ref=f7e454]
+              - paragraph [ref=f7e455]: Esta página web permite crear un chat temporal rápido y sencillo. La web se puede usar sin necesidad de registrarse y con funcionalidades como enviar mensajes, fotos, videos, audios y archivos. También permite crear salas de chat con funcionalidades como mínimo tiempo de actividad o exigencia de foco en el chat. La construcción de la página se hizo con React y Typescript y el backend con Fastapi.
+              - generic [ref=f7e456]:
+                - generic [ref=f7e457]: React
+                - generic [ref=f7e458]: Typescript
+                - generic [ref=f7e459]: Python
+                - generic [ref=f7e460]: fastAPI
+              - generic [ref=f7e461]:
+                - link "Repositorio (Frontend)" [ref=f7e462] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/chattus_front
+                - link "Repositorio (Backend)" [ref=f7e463] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/chattus_back
+                - link "Demo" [ref=f7e464] [cursor=pointer]:
+                  - /url: https://chattus.netlify.app
+            - text: Ver el proyecto
+          - article [ref=f7e465]:
+            - link [ref=f7e466] [cursor=pointer]:
+              - /url: "#"
+              - img "Prematch surebets gettor" [ref=f7e467]
+            - generic [ref=f7e468]:
+              - heading "Prematch surebets gettor" [level=3] [ref=f7e469]
+              - paragraph [ref=f7e470]: "Este es un bot, que busca surebets en 3 casas de apuestas: wplay, betplay y codere. Analiza los eventos de futbol de cada una de las casas de apuestas y agrupa los mismos eventos, para luego ver si existe una surebet. Si es asi, la envia a todos los que esten suscritos al bot de telegram!"
+              - generic [ref=f7e471]:
+                - generic [ref=f7e472]: Python
+                - generic [ref=f7e473]: Beautiful Soup
+                - generic [ref=f7e474]: pyTelegramBotAPI
+              - generic [ref=f7e475]:
+                - link "Repositorio" [ref=f7e476] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/prematch_bettor
+                - link "Chatbot de Telegram" [ref=f7e477] [cursor=pointer]:
+                  - /url: https://t.me/PreSureBetbot
+            - text: Ver el proyecto
+          - article [ref=f7e478]:
+            - link [ref=f7e479] [cursor=pointer]:
+              - /url: "#"
+              - img "DevKalk" [ref=f7e480]
+            - generic [ref=f7e481]:
+              - heading "DevKalk" [level=3] [ref=f7e482]
+              - paragraph [ref=f7e483]: DevKalk es una Progressive Web App (PWA) diseñada para desarrolladores freelance. Esta herramienta ayuda a crear presupuestos de proyectos con precisión utilizando sugerencias impulsadas por Inteligencia Artificial para mejorar la exactitud en la estimación. Permite crear, editar y gestionar funcionalidades y tareas del proyecto, con opciones como exportación a PDF, importación/exportación de configuraciones y edición dinámica del proyecto.
+              - generic [ref=f7e484]:
+                - generic [ref=f7e485]: React
+                - generic [ref=f7e486]: Redux Toolkit
+                - generic [ref=f7e487]: Tailwind CSS
+                - generic [ref=f7e488]: PWA
+              - generic [ref=f7e489]:
+                - link "Repositorio" [ref=f7e490] [cursor=pointer]:
+                  - /url: https://github.com/jjhbotache/projectCalc
+                - link "Demo" [ref=f7e491] [cursor=pointer]:
+                  - /url: https://devkalk.vercel.app
+            - text: Ver el proyecto
+          - article [ref=f7e492]:
+            - link [aria-hidden] [ref=f7e493] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e494]:
+              - heading "Chattus" [level=3] [ref=f7e495]
+              - paragraph [ref=f7e496]: Esta página web permite crear un chat temporal rápido y sencillo. La web se puede usar sin necesidad de registrarse y con funcionalidades como enviar mensajes, fotos, videos, audios y archivos. También permite crear salas de chat con funcionalidades como mínimo tiempo de actividad o exigencia de foco en el chat. La construcción de la página se hizo con React y Typescript y el backend con Fastapi.
+            - text: Ver el proyecto
+          - article [ref=f7e497]:
+            - link [aria-hidden] [ref=f7e498] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e499]:
+              - heading "Prematch surebets gettor" [level=3] [ref=f7e500]
+              - paragraph [ref=f7e501]: "Este es un bot, que busca surebets en 3 casas de apuestas: wplay, betplay y codere. Analiza los eventos de futbol de cada una de las casas de apuestas y agrupa los mismos eventos, para luego ver si existe una surebet. Si es asi, la envia a todos los que esten suscritos al bot de telegram!"
+            - text: Ver el proyecto
+          - article [ref=f7e502]:
+            - link [aria-hidden] [ref=f7e503] [cursor=pointer]:
+              - /url: "#"
+            - generic [ref=f7e504]:
+              - heading "DevKalk" [level=3] [ref=f7e505]
+              - paragraph [ref=f7e506]: DevKalk es una Progressive Web App (PWA) diseñada para desarrolladores freelance. Esta herramienta ayuda a crear presupuestos de proyectos con precisión utilizando sugerencias impulsadas por Inteligencia Artificial para mejorar la exactitud en la estimación. Permite crear, editar y gestionar funcionalidades y tareas del proyecto, con opciones como exportación a PDF, importación/exportación de configuraciones y edición dinámica del proyecto.
+            - text: Ver el proyecto
+    - generic [ref=f7e507]:
+      - generic [ref=f7e508]:
+        - paragraph [ref=f7e509]: ¿Te interesa mi trabajo? Escríbeme y charlemos sobre cómo puedo ayudarte a construir tu próximo proyecto.
+        - link "juanjosehuertas.dev@gmail.com" [ref=f7e510] [cursor=pointer]:
+          - /url: mailto:juanjosehuertas.dev@gmail.com
+        - paragraph [ref=f7e511]:
+          - generic [ref=f7e512]: "o al teléfono:"
+          - link "+57 3241066569" [ref=f7e513] [cursor=pointer]:
+            - /url: https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!
+      - generic [ref=f7e518]:
+        - link "GitHub" [ref=f7e519] [cursor=pointer]:
+          - /url: https://github.com/jjhbotache
+        - link "Email" [ref=f7e522] [cursor=pointer]:
+          - /url: mailto:juanjosehuertas.dev@gmail.com
+        - link "LinkedIn" [ref=f7e525] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/juan-jose-huertas-botache
+        - link "Telegram" [ref=f7e528] [cursor=pointer]:
+          - /url: https://t.me/jjhbotache
+        - link "WhatsApp" [ref=f7e531] [cursor=pointer]:
+          - /url: https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!
+        - link "GitHub" [ref=f7e534] [cursor=pointer]:
+          - /url: https://github.com/jjhbotache
+        - link "Email" [ref=f7e537] [cursor=pointer]:
+          - /url: mailto:juanjosehuertas.dev@gmail.com
+        - link "LinkedIn" [ref=f7e540] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/juan-jose-huertas-botache
+        - link "Telegram" [ref=f7e543] [cursor=pointer]:
+          - /url: https://t.me/jjhbotache
+        - link "WhatsApp" [ref=f7e546] [cursor=pointer]:
+          - /url: https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!

@@ -1,0 +1,352 @@
+---
+import { t, type Lang } from '../../i18n/utils';
+import { technologyCategories } from '../../content/technologiesByCategory';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props as Props;
+
+// Tech rows for the infinite marquees. Each category becomes its own row;
+// only the `back` row scrolls right (the others go left), achieved with the
+// `reverse` data-attr consumed by the CSS. Items are duplicated so the
+// translateX(0 → -50%) keyframe loops without a visible jump — same
+// approach used in AboutMeDetail.astro.
+const duplicatedRows = technologyCategories.map((category) => ({
+  ...category,
+  duplicated: [...category.items, ...category.items],
+}));
+---
+<section class="about" data-section="about" id="about" data-about-intro >
+  <div class="about__marquees" data-about-marquees>
+    {duplicatedRows.map((row) => (
+      <div class="about__marquee-row" data-tech-direction={row.id === 'back' ? 'reverse' : 'forward'}>
+        <div class="about__marquee-mask">
+          <div class="about__marquee-track" data-tech-track={row.id}>
+            {row.duplicated.map((tech) => (
+              <a href={tech.technologyLink} target="_blank" rel="noopener noreferrer" class="about__marquee-item" aria-label={tech.name} title={tech.name}>
+                <img src={tech.svgUrl} alt={tech.name} class="about__marquee-icon" loading="lazy" decoding="async" />
+                <span class="about__marquee-name">{tech.name}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+  
+  <p class="about__intro" data-about-body data-text={t(lang, 'sections.about.body')}/>
+
+  
+  <img src="/me.png" alt="Juan Jose Huertas avatar" class="about__avatar" data-about-avatar />
+  <div class="about__floaters" data-about-floaters>
+    <img src="/js_ball.png" alt="JavaScript" class="about__floater" data-floater="1" />
+    <img src="/react_ball.png" alt="React" class="about__floater" data-floater="2" />
+    <img src="/fastapi_ball.png" alt="FastAPI" class="about__floater" data-floater="3" />
+    <img src="/py_ball.png" alt="Python" class="about__floater" data-floater="4" />
+  </div>
+  <p class="about__subintro" data-about-subintro data-text={t(lang, 'sections.about.body2')}/>
+</section>
+
+<style>
+  .about {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    padding: 6rem var(--shell-pad-x);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4rem;
+    background: radial-gradient(ellipse at 50% 30%, rgba(139, 92, 246, 0.18) 0%, transparent 65%),
+                radial-gradient(ellipse at 50% 80%, rgba(0, 181, 232, 0.18) 0%, transparent 60%),
+                var(--c-bg);
+                
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 84%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 0%, black 84%, transparent 100%);
+  }
+
+  /* Marquee row (forward). The keyframe is shared by both rows; we invert
+   * direction by setting animation-direction on the .reverse variant. */
+  .about__marquees {
+    position: sticky;
+    top: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    z-index: 1;
+    transform: scale(.4) translateY(-50%) ;
+    opacity: 0;
+  }
+
+  .about__marquee-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .about__marquee-mask {
+    position: relative;
+    flex: 1 1 auto;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  }
+
+  .about__marquee-track {
+    display: flex;
+    align-items: center;
+    box-sizing: content-box;
+    width: max-content;
+    white-space: nowrap;
+    animation: marquee-scroll 65s linear infinite;
+    animation-play-state: paused;
+  }
+  .about.is-active .about__marquee-track {
+    animation-play-state: running;
+  }
+  .about__marquee-row[data-tech-direction="reverse"] .about__marquee-track {
+    animation-direction: reverse;
+  }
+
+  @keyframes marquee-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .about__marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-right: 1.5rem;
+    padding: 0.5rem 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .about__marquee-item:hover {
+    transform: scale(0.95);
+  }
+
+  .about__marquee-icon {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .about__marquee-name {
+    font-family: var(--ff-pixeloid);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+  }
+
+
+  .about__intro, .about__subintro {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    margin: 0;
+    font-family: var(--ff-pixeloid);
+    font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+    line-height: 1.4;
+    color: var(--c-text);
+    max-width: 60rem;
+    backdrop-filter: blur(0.4rem);
+    border-radius: 1em;
+    padding: 1rem ;
+    --dark-color: 0;
+    background: rgba(var(--dark-color), var(--dark-color), var(--dark-color), 0.3);
+    box-shadow: 0 0 2rem rgba(var(--dark-color), var(--dark-color), var(--dark-color),0.8);
+    text-align: center;
+  }
+
+
+  .about__intro strong,
+  .about__subintro strong {
+    color: var(--c-secondary);
+  }
+
+
+  .about__avatar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) scale(0.1);
+    opacity: 0;
+    height: 110%;
+    width:auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 1rem rgba(0, 181, 232, 0.4));
+  }
+
+
+  .about__floaters {
+    position: absolute;
+    bottom: 10%;
+    display: flex;
+    gap: 5rem;
+    align-items: center;
+    justify-content: center;
+  }
+  .about__subintro,.about__avatar{
+    display: none;
+  }
+  
+  .about__floater {
+    width: 10vw;
+    height: 10vw;
+    object-fit: contain;
+    filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 1));
+    animation: levitate 3.4s ease-in-out infinite;
+    animation-play-state: paused;
+  }
+  .about.is-active .about__floater { animation-play-state: running; }
+  .about__floater[data-floater="1"] { animation-duration: 3.4s; }
+  .about__floater[data-floater="2"] { animation-duration: 3.8s; animation-delay: 0.3s; }
+  .about__floater[data-floater="3"] { animation-duration: 3.0s; animation-delay: 0.6s; }
+  .about__floater[data-floater="4"] { animation-duration: 3.6s; animation-delay: 0.9s; }
+
+  @keyframes levitate {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-14px); }
+  }
+
+  @media (max-width: 768px) {
+    .about { gap: 2.5rem; padding: 4rem var(--shell-pad-x); }
+    .about__floater { width: 2.5rem; height: 2.5rem; }
+    .about__floaters { gap: 1rem; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { TextPlugin } from 'gsap/TextPlugin';
+
+  gsap.registerPlugin(TextPlugin);
+  gsap.registerPlugin(ScrollTrigger);
+
+  const init = () => {
+    const intro = document.querySelector<HTMLElement>('[data-about-intro]');
+    const marquees = document.querySelector<HTMLElement>('[data-about-marquees]');
+    const firstText = document.querySelector<HTMLElement>('[data-about-body]');
+    const avatar = document.querySelector<HTMLElement>('[data-about-avatar]');
+    const subintro = document.querySelector<HTMLElement>('[data-about-subintro]');
+    const floaters = document.querySelector<HTMLElement>('[data-about-floaters]');
+
+    if (!intro || !marquees || !subintro || !avatar || !floaters || !firstText) return;
+
+
+    const tl = gsap.timeline({ paused: true});
+
+    // animate first section =============================================
+    tl.to(marquees, {
+      scale: 1.4,
+      yPercent: -40,
+      rotate: 5,
+      opacity: 1,
+      duration: 15,
+      ease: 'sine.inOut',
+    }, 0);
+    tl.addLabel('firstSection');
+    tl.to(firstText, {
+      text: firstText.dataset.text || '',
+      ease: 'power4.inOut',
+      duration: 10
+    }, 0);
+    // outro
+    tl.to(firstText, {
+      scale: 5,
+      opacity: 0,
+      ease: 'power4.in',
+      duration: 20,
+      display: 'none'
+    }, ">");
+
+    tl.to(marquees, {
+      scale: 6,
+      rotate: 20,
+      opacity: 0,
+      duration: 15,
+      ease: 'power4.in',
+      display: 'none'
+    }, 12);
+    // animate second section =============================================
+    tl.to(avatar, {
+      display: 'block',
+      opacity: .4,
+      scale: 1,
+      duration: 15,
+      ease: 'power1.out',
+    }, ">+=2");
+    tl.from(floaters, {
+      display: 'none',
+      y : "50vh",
+      ease: 'power2.out',
+      duration: 5,
+    }, "<");
+    tl.to(subintro, {
+      display: 'block',
+      text: subintro.dataset.text || '',
+      ease: 'sine.inOut',
+      duration: 10
+    }, "<+=4");
+    tl.addLabel('secondSection');
+
+
+    // outro
+    tl.to(floaters, {
+      opacity: 0,
+      scale: 0,
+      duration: 10,
+      ease: 'power1.in',
+    }, ">");
+    tl.to(avatar, {
+      opacity: 0,
+      scale: 3,
+      duration: 15,
+      ease: 'power4.in',
+    }, "<");
+    tl.to(subintro, {
+      opacity: 0,
+      scale: 5,
+      duration: 15,
+      ease: 'power4.in',
+    }, "<");
+
+    // Pin distance shortened from +=6000 to +=3500 (about 40% reduction
+    // in scroll-pinned time) and scrub dropped from 2 to 0.5 so the
+    // timeline tracks scroll closely instead of chasing it with a 2s
+    // lag — the previous combo was the main source of the perceived
+    // jank during About.
+    ScrollTrigger.create({
+      trigger: intro,
+      scroller: window,
+      pin: true,
+      start: 'top top',
+      end: '+=10000',
+      scrub: 0.5,
+      animation: tl,
+      snap: {
+        snapTo: 'labels',
+        duration: { min: 0.3, max: 0.7 },
+        ease: 'power1.out',
+      },
+      onToggle: (self) => {
+        intro.classList.toggle('is-active', self.isActive);
+      },
+    });
+  };
+
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+</script>

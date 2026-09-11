@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Splash from '../components/sections/Splash.astro';
+import Experience from '../components/sections/Experience.astro';
+import About from '../components/sections/About.astro';
+import Projects from '../components/sections/Projects.astro';
+import Contact from '../components/sections/Contact.astro';
+import ProjectsPreloads from '../components/ProjectsPreloads.astro';
+import ScrollProgress from '../components/ScrollProgress.astro';
+import { DEFAULT_LANG, type Lang } from '../i18n/utils';
+
+// Resolve the landing language from the URL `?lang=xx` query first, then
+// fall back to the Astro cookie (`Astro.preferredLocale` isn't set up here
+// so we just look at the URL). Default is Spanish. The lang toggle in the
+// layout appends `?lang=en` and reloads, so the content collections are
+// re-resolved for the new locale.
+const url = Astro.url;
+const queryLang = url.searchParams.get('lang');
+const lang: Lang = (queryLang === 'en' || queryLang === 'es')
+  ? (queryLang as Lang)
+  : DEFAULT_LANG;
+---
+<Base lang={lang}>
+  <!-- Preload every visible project cover image so the browser starts
+       downloading them in parallel with the JS bundle. First image gets
+       fetchpriority="high" inside ProjectsPreloads.astro. -->
+  <ProjectsPreloads slot="head" />
+
+  <ScrollProgress />
+
+  <main class="page">
+    <Splash lang={lang} />
+    <Experience lang={lang} />
+    <About lang={lang} />
+    <Projects lang={lang} />
+    <Contact lang={lang} />
+  </main>
+</Base>
+
+<style>
+  .page {
+    position: relative;
+    width: 100%;
+  }
+</style>
+
+<!-- Global orchestrator: refresh ScrollTrigger on resize and on language
+     change so the timeline stays in sync. The per-section timelines are
+     created inside each component script. -->
+<script>
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  const refresh = () => {
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  };
+
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', refresh);
+  window.addEventListener('portafolio:lang', refresh);
+</script>

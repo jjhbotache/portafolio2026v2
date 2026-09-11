@@ -1,0 +1,26 @@
+{
+  "name": "portafolio-2026",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.3.1",
+    "astro-icon": "^1.2.0",
+    "gsap": "^3.12.5",
+    "lucide": "^1.43.0",
+    "morphicons": "^1.7.1",
+    "swiper": "^11.1.14"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.5.0",
+    "typescript": "^6.0.3"
+  }
+}

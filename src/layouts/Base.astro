@@ -1,0 +1,94 @@
+---
+import '../styles/global.css';
+import { t, type Lang } from '../i18n/utils';
+import Menu from '../components/Menu.astro';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+}
+
+const { lang, title, description } = Astro.props as Props;
+const pageTitle = title ?? t(lang, 'site.title');
+const pageDescription = description ?? t(lang, 'site.description');
+---
+<!doctype html>
+<html lang={lang} data-lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={pageDescription} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="preload" as="image" href="/me.png" />
+    <link rel="preload" as="font" type="font/ttf" href="/fonts/PixeloidSans.ttf" crossorigin />
+    <!-- <link rel="preload" as="font" type="font/ttf" href="/fonts/Tr2n.ttf" crossorigin /> -->
+
+    <!-- Optional head slot: pages can inject extra <link>, <meta>, etc. here
+         (e.g. per-page image preloads). Renders nothing if unused. -->
+    <slot name="head" />
+
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <!-- Language toggle is fixed top-right, JS reads its `data-lang-flip`. -->
+    <Menu lang={lang} />
+
+    <slot />
+
+    <!-- Tiny helper that runs on every page: toggles the html lang attribute
+         and dispatches a custom event so GSAP scripts can replay letter
+         animations. The lang switch is purely client-side; every section
+         renders both languages in the HTML and CSS shows the right one. -->
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const setLang = (next) => {
+          if (next !== 'es' && next !== 'en') return;
+          root.setAttribute('lang', next);
+          root.setAttribute('data-lang', next);
+          try { localStorage.setItem('preferred-lang', next); } catch (e) {}
+          window.dispatchEvent(new CustomEvent('portafolio:lang', { detail: { lang: next } }));
+        };
+        document.addEventListener('click', (e) => {
+          const target = e.target instanceof Element ? e.target.closest('[data-lang-flip]') : null;
+          if (!target) return;
+          const current = root.getAttribute('data-lang') || 'es';
+          setLang(current === 'es' ? 'en' : 'es');
+        });
+        try {
+          const stored = localStorage.getItem('preferred-lang');
+          if (stored === 'es' || stored === 'en') setLang(stored);
+          const url = new URL(window.location.href);
+          const qp = url.searchParams.get('lang');
+          if (qp === 'es' || qp === 'en') setLang(qp);
+        } catch (e) {}
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  .lang-toggle {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 100;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    background: rgb(3, 17, 45);
+    backdrop-filter: blur(8px);
+    color: var(--c-text);
+    font-family: var(--ff-pixeloid);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: border-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+  }
+  .lang-toggle:hover {
+    color: var(--c-secondary);
+    border-color: var(--c-secondary);
+  }
+</style>

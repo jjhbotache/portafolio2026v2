@@ -1,0 +1,351 @@
+---
+import { t, type Lang } from '../../i18n/utils';
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props as Props;
+
+const CONTACT_EMAIL = 'juanjosehuertas.dev@gmail.com';
+const CONTACT_PHONE_DISPLAY = '+57 3241066569';
+const CONTACT_PHONE_HREF = 'https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!';
+
+const contactIcons = [
+  { iconName: "github",   label: 'GitHub',   href: 'https://github.com/jjhbotache' },
+  { iconName: "gmail",    label: 'Email',    href: `mailto:${CONTACT_EMAIL}` },
+  { iconName: "linkedin", label: 'LinkedIn', href: lang === 'en' ? 'https://www.linkedin.com/in/juan-jose-huertas-botache?locale=en-US' : 'https://www.linkedin.com/in/juan-jose-huertas-botache' },
+  { iconName: "telegram", label: 'Telegram', href: 'https://t.me/jjhbotache' },
+  { iconName: "whatsapp", label: 'WhatsApp', href: CONTACT_PHONE_HREF },
+] as const;
+
+const duplicatedIcons = [...contactIcons, ...contactIcons];
+const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
+---
+<section class="contact bg-contact" data-section="contact" id="contact">
+  <div class="contact__content" data-contact-content>
+
+    <p class="contact__body" data-lang={lang}>
+      {t(lang, 'sections.contact.body')}
+    </p>
+
+    <a
+      href={`mailto:${CONTACT_EMAIL}`}
+      class="contact__email"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span class="contact__email-user">{emailUser}</span><span class="contact__email-domain">@{emailDomain}</span>
+    </a>
+
+    <p class="contact__phone">
+      <span data-lang={lang}>{t(lang, 'sections.contact.phoneLabel')}:</span>
+      
+      <a
+        href={CONTACT_PHONE_HREF}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="contact__phone-link"
+      >
+        <Icon name="whatsapp" class="contact__phone-icon" />
+        {CONTACT_PHONE_DISPLAY}
+      </a>
+    </p>
+  </div>
+
+  <div class="contact__marquee-wrap" data-contact-marquee>
+    <div class="contact__marquee-mask">
+      <div class="contact__marquee-track" data-tech-track="contact">
+        {duplicatedIcons.map((entry) => (
+          <a
+            href={entry.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact__marquee-item"
+            aria-label={entry.label}
+            title={entry.label}
+          >
+            <Icon name={entry.iconName} class="contact__marquee-icon" />
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Register custom properties so the browser can interpolate them smoothly
+     when GSAP tweens them on mousemove. Without @property the values are
+     treated as opaque strings and the radial gradient snaps between
+     frames instead of gliding toward the cursor. */
+  @property --glow-x { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+  @property --glow-y { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+
+  .contact {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    padding: 6rem var(--shell-pad-x) 4rem ;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    background-color:hsla(236,100%,6%,1);
+    background-image:
+
+    radial-gradient(at 89% 93%, hsla(260,45%,18%,1) 0px, transparent 50%),
+    radial-gradient(at 7% 33%, hsla(244,56%,8%,1) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(260,40%,27%,1) 0px, transparent 50%),
+    /* Mouse-following highlight. The origin is driven by --glow-x/--glow-y
+       which the script updates on mousemove. Kept on top of the static
+       layers so the highlight stays the focal point. */
+    /* radial-gradient(at var(--glow-x) var(--glow-y), hsla(280, 95%, 60%, 0.144) 0px, transparent 38%); */
+    /* make it but as an ellipse */
+    radial-gradient(ellipse at var(--glow-x) var(--glow-y), rgba(12, 9, 82, 1) 0px, hsla(256, 82%, 11%, 0.25) 15%, transparent 70%);
+
+    --mask-percentage-x:5%;
+    --mask-percentage-y:15%;
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, black calc(var(--mask-percentage-x)), black calc(100% - var(--mask-percentage-x)), transparent 100%),
+      linear-gradient(to bottom, transparent 0%, black calc(var(--mask-percentage-y)), black calc(100% - var(--mask-percentage-y)), transparent 100%);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      linear-gradient(to right, transparent 0%, black calc(var(--mask-percentage-x)), black calc(100% - var(--mask-percentage-x)), transparent 100%),
+      linear-gradient(to bottom, transparent 0%, black calc(var(--mask-percentage-y)), black calc(100% - var(--mask-percentage-y)), transparent 100%);
+            mask-composite: intersect;
+            
+            
+  }
+
+  .contact__content {
+    position: relative;
+    z-index: 2;
+    text-align: left;
+    max-width: 60rem;
+    padding: 3rem 2rem;
+    margin: 0  0 5vw 5vw;
+  }
+
+  .contact__body {
+    margin: 0 0 2rem;
+    color: var(--c-text-muted);
+    font-family: var(--ff-pixeloid);
+    font-size: 1.05rem;
+    line-height: 1.5;
+    max-width: clamp(20rem, 40vw, 40rem);
+  }
+
+  .contact__email {
+    display: inline-block;
+    font-family: var(--ff-pixeloid);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: clamp(1.4rem, 3vw, 2.5rem);
+    color: var(--c-text);
+    text-decoration: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 0.3rem;
+    transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
+    word-break: break-all;
+  }
+  .contact__email:hover {
+    color: var(--c-primary-deep);
+    border-color: var(--c-primary-deep);
+  }
+
+  .contact__email-user { color: var(--c-text); }
+  .contact__email-domain {
+    font-size: 0.45em;
+    color: rgba(255, 255, 255, 0.5);
+    margin-left: 0.15em;
+  }
+
+  .contact__phone {
+    margin: 1.5rem 0 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: var(--ff-pixeloid);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 0.5rem;
+  }
+
+  .contact__phone-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--c-text);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color var(--t-fast) var(--ease-out);
+  }
+  .contact__phone-link:hover { color: var(--c-secondary); }
+
+  .contact__phone-icon { width: 1.25rem; height: 1.25rem; }
+
+  .contact__marquee-wrap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    transform: rotate(-28deg) translate(20%,25%);
+    
+    
+    width: 100%;
+    max-width: var(--shell-max);
+    overflow: hidden;
+    
+    /* --mask-percentage:35%;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black calc(var(--mask-percentage)), black calc(100% - var(--mask-percentage)), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0%, black calc(var(--mask-percentage)), black calc(100% - var(--mask-percentage)), transparent 100%); */
+  }
+
+  .contact__marquee-mask { width: 100%; overflow: hidden; }
+
+  .contact__marquee-track {
+    display: flex;
+    align-items: center;
+    box-sizing: content-box;
+    width: max-content;
+    white-space: nowrap;
+    will-change: transform;
+    animation: marquee-scroll 20s linear infinite;
+    filter: saturate(0) brightness(0.85);
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .contact__marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .contact__marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 1.5rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+  }
+  /* .contact__marquee-item:hover {
+    background: rgba(0, 181, 232, 0.15);
+    border-color: rgba(0, 181, 232, 0.45);
+    color: var(--c-secondary);
+    transform: scale(0.95);
+    
+  } */
+
+  .contact__marquee-icon{
+    width: 12rem;
+    height: 12rem;
+    flex-shrink: 0;
+    color: var(--c-text-muted);
+    transition: color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+  }
+  .contact__marquee-icon:hover { 
+    transform: scale(.95);
+    color: var(--c-text);
+   }
+
+  @media (max-width: 768px) {
+    .contact__marquee-wrap { transform: rotate(-3deg) translateY(1rem); }
+    .contact__marquee-icon { width: 2.5rem; height: 2.5rem; }
+    .contact__content { padding: 2rem 1rem; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Left-to-right wipe reveal driven by scroll. The element starts fully
+  // clipped on the right (`inset(0 100% 0 0)`) and the right inset is
+  // scrubbed down to 0 so the content slides into view from the left.
+  // `clip-path` is GPU-composited, so this is safe to bind to `scrub`.
+  // We use `fromTo` (not `to`) so the reverse scrub cleanly restores the
+  // initial clipped state when the user scrolls back up.
+  const init = () => {
+    const content = document.querySelector<HTMLElement>('[data-contact-content]');
+    const section = document.querySelector<HTMLElement>('#contact');
+    if (!content || !section) return;
+
+    gsap.from(
+      content,
+      {
+        yPercent: 20,
+        opacity: 0,
+        ease: 'sine.out',
+        duration: 2,
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 20%',
+          // actions for states: enter, leave, enter back, leave back.
+          toggleActions: 'play reverse play reverse',
+          // Promote only while the trigger is live so the layer is
+          // released once the wipe finishes — avoids burning VRAM
+          // for the rest of the session.
+          onEnter: () => gsap.set(content, { willChange: 'transform, opacity' }),
+          onLeave: () => gsap.set(content, { willChange: 'auto' }),
+          onEnterBack: () => gsap.set(content, { willChange: 'transform, opacity' }),
+          onLeaveBack: () => gsap.set(content, { willChange: 'auto' }),
+        },
+      },
+    );
+
+
+
+    const handlePointerMove = (e: MouseEvent) => {
+      
+      const xPercent = Math.round( (e.x / section.clientWidth) * 100 );
+      const yPercent = Math.round( (e.y / section.clientHeight) * 100 );
+      
+      gsap.to(section, {
+        '--glow-x': `${xPercent}%`,
+        '--glow-y': `${yPercent}%`,
+        duration: 0.3,
+        ease: 'power3.out',
+      });
+      
+    };
+
+
+    section.addEventListener('mousemove', handlePointerMove);
+  };
+
+  // Defer setup until the section is close to the viewport. Without this
+  // gate GSAP runs (and registers listeners) at DOMContentLoaded even
+  // when the user is still on Splash, which is wasted work.
+  const bootWhenNear = () => {
+    const section = document.querySelector<HTMLElement>('#contact');
+    if (!section) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      init();
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries, observer) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            init();
+            return;
+          }
+        }
+      },
+      { rootMargin: '200px 0px' },
+    );
+    io.observe(section);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootWhenNear, { once: true });
+  } else {
+    bootWhenNear();
+  }
+</script>
