@@ -1,6 +1,7 @@
 ---
 import { t, type Lang } from '../../i18n/utils';
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
 import { resolve, formatPeriod } from '../../lib/collectionHelpers';
 
 interface Props {
@@ -11,17 +12,21 @@ const { lang } = Astro.props as Props;
 const entries = (await getCollection('experiences'))
   .sort((a, b) =>  (b.data.importance ?? 0) - (a.data.importance ?? 0));
 
-// Pre-render the bilingual bodies
-const resolved = await Promise.all(
-  entries.map(async (entry) => {
-    const { Content } = await render(entry);
-    return {
-      id: entry.id,
-      data: entry.data,
-      Content,
-    };
-  }),
-);
+// Pre-parse the bilingual `content` frontmatter field to HTML so the
+// detail overlay can inject it with `set:html` (instead of relying on
+// the markdown body via `astro:content`'s render — which renders only
+// the (placeholder) body). Both languages are pre-computed so a locale
+// switch does not require a re-fetch.
+const resolved = entries.map((entry) => {
+  const contentEs = marked.parse(resolve(entry.data.content, 'es'), { async: false }) as string;
+  const contentEn = marked.parse(resolve(entry.data.content, 'en'), { async: false }) as string;
+  const contentHtml = lang === 'es' ? contentEs : contentEn;
+  return {
+    id: entry.id,
+    data: entry.data,
+    contentHtml,
+  };
+});
 ---
 <section
   class="experience bg-experience"
@@ -119,35 +124,54 @@ const resolved = await Promise.all(
             <!-- Detail overlay (technologies + full content). Shown when the
                  user clicks the .experience__card-toggle. CSS toggles it. -->
             <div class="experience__card-overlay" data-experience-overlay={exp.id}>
+              <button
+                type="button"
+                class="experience__card-close"
+                data-experience-close={exp.id}
+                aria-label={close}
+              >×</button>
+              
               <div class="experience__card-overlay-inner">
                 <div class="experience__card-techs">
                   {tech.map((item, i) => (
                     <span
                       class="experience__card-tech"
-                      style={`transition-delay: ${300 + i * 50}ms;`}
+                      style={`transition-delay: ${300 + i * 100}ms;`}
+                      data-delay={300 + i * 100}
                     >
                       <span data-lang={lang}>{item}</span>
                     </span>
                   ))}
                 </div>
-                <div class="experience__card-content">
-                  {/* Single body — the entry's markdown body is rendered as-is.
-                   * Bilingual content is supplied via frontmatter fields
-                   * (title/description/technologies) which we already render
-                   * in both languages above. The body is the deep-dive text
-                   * and is typically the same in both languages. */}
-                  <exp.Content />
-                </div>
-                <small class="experience__card-close-hint">
-                  <span data-lang={lang}>{close}</span>
-                </small>
-                <button
-                  type="button"
-                  class="experience__card-close"
-                  data-experience-close={exp.id}
-                  aria-label={close}
-                >×</button>
+                <div
+                  id={`experienceContent-${exp.id}`}
+                  class="experience__card-content"
+                  data-experience-content
+                  set:html={exp.contentHtml}
+                />
+
+                {/* Open every link in a new tab and underline them. Done in
+                 * an inline script per card so the post-processing runs as
+                 * soon as the parsed HTML lands in the DOM. `rel="noopener
+                 * noreferrer"` is added for tabnabbing protection. */}
+                <script is:inline define:vars={{ expId: exp.id }}>
+                  (function () {
+                    var container = document.getElementById('experienceContent-' + expId);
+                    if (!container) return;
+                    container.querySelectorAll('a').forEach(function (link) {
+                      link.setAttribute('target', '_blank');
+                      link.setAttribute('rel', 'noopener noreferrer');
+                      link.style.textDecoration = 'underline';
+                    });
+                    // Stop the toggle's "click outside collapses" handler
+                    // from firing when the user clicks inside the content.
+                    container.addEventListener('click', function (e) {
+                      e.stopPropagation();
+                    });
+                  })();
+                </script>
               </div>
+              
             </div>
           </article>
           );
@@ -160,6 +184,7 @@ const resolved = await Promise.all(
         type="button"
         class="experience__see-all"
         data-experience-see-all
+        disabled
       >
         <span data-lang={lang}>{t(lang, 'experience.seeAll')}</span>
       </button>
@@ -272,13 +297,13 @@ const resolved = await Promise.all(
     gap: 0.5rem;
     color: var(--c-text);
     overflow: hidden;
-    font:  clamp(0.7rem, 1vw, 0.85rem) var(--ff-geist-pixel);
+    font:  clamp(0.7rem, 5vw, 4rem) var(--ff-geist-pixel);
   }
 
   .experience__card-title {
     margin: 0;
     font-family: var(--ff-pixeloid);
-    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+    font-size: clamp(0.95rem, 3vw, 2rem);
     line-height: 1.15;
   }
 
@@ -292,7 +317,7 @@ const resolved = await Promise.all(
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.72rem;
+    font-size: .8rem;
     color: rgba(255, 255, 255, 0.8);
     text-decoration: underline;
     transition: color var(--t-fast) var(--ease-out);
@@ -302,31 +327,33 @@ const resolved = await Promise.all(
   .experience__card-enterprise-logo {
     width: 1.5rem;
     height: 1.5rem;
+    
     border-radius: 0.25rem;
     object-fit: cover;
   }
 
   .experience__card-period {
     margin: 0;
-    font-size: 0.6rem;
+    font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
   }
 
   .experience__card-description {
     margin: 0;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     line-height: 1.45;
     color: rgba(255, 255, 255, 0.85);
-    max-height: 10vh;
+    max-height: 50vh;
     overflow-y: auto;
+    font-family: var(--ff-pixeloid);
   }
 
   .experience__card-toggle {
     align-self: flex-start;
     padding: 0;
     font-family: var(--ff-pixeloid);
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     color: var(--c-text);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -403,12 +430,13 @@ const resolved = await Promise.all(
     gap: 0.65rem;
     width: 100%;
     height: 100%;
+    overflow-y: auto;
   }
 
   .experience__card-techs {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: start;
     gap: 0.4rem;
   }
 
@@ -419,16 +447,24 @@ const resolved = await Promise.all(
     color: var(--c-secondary);
     border: 1px solid rgba(0, 181, 232, 0.3);
     font-size: 0.72rem;
+    font-family: var(--ff-pixeloid);
     opacity: 0;
-    transition: opacity var(--t-fast) var(--ease-out);
+    transform: translate(5rem,0);
+    transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
   }
-  .experience__card.is-expanded .experience__card-tech { opacity: 1; }
+  .experience__card.is-expanded .experience__card-tech { opacity: 1; transform: translate(0,0); }
 
   .experience__card-content {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.75);
+    max-width: 90%;
+    font-family: var( --ff-pixeloid);
     line-height: 1.5;
     overflow-y: auto;
+    text-align: justify;
+    /* make a fade out to the bottom */
+    padding-bottom: 3rem;
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 1rem, rgba(0, 0, 0, 1) 3rem);
   }
   .experience__card-content :global(a) {
     text-decoration: underline;
@@ -436,15 +472,11 @@ const resolved = await Promise.all(
   }
   .experience__card-content :global(strong) { color: var(--c-text); }
 
-  .experience__card-close-hint {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.7rem;
-  }
-
   .experience__card-close {
     position: absolute;
-    top: 0.25rem;
-    right: 0.5rem;
+    z-index: 2;
+    top: 1.25rem;
+    right: 1.25rem;
     font-size: 1.5rem;
     line-height: 1;
     color: var(--c-text);
@@ -469,6 +501,16 @@ const resolved = await Promise.all(
   .experience__see-all:hover {
     background: var(--c-secondary);
     color: var(--c-bg);
+  }
+  .experience__see-all:disabled {
+    opacity: 0.9;
+    cursor: not-allowed;
+    border-color: rgb(171, 171, 171);
+    color: rgb(171, 171, 171);
+    background: rgba(171, 171, 171, 0.1);
+  }
+  .experience__see-all:disabled:hover {
+    background: rgba(171, 171, 171, 0.3);
   }
 
   /* The spacer exists only to give the ScrollTrigger vertical scroll
@@ -562,7 +604,7 @@ const resolved = await Promise.all(
     });
     
     timeline.set(cards[0], { scale: 1, yPercent: -50, xPercent: -50, opacity: 1 });
-    cards.slice(1).forEach((card) => { timeline.set(card, { xPercent: -50, opacity: 0 })});
+    cards.slice(1).forEach((card) => { timeline.set(card, { xPercent: -50, yPercent: 50, opacity: 0 })});
     timeline.addLabel('card-0', 0);
 
     
@@ -574,7 +616,7 @@ const resolved = await Promise.all(
       if (step === 0) return;
 
       const segmentTime = (step - 1) * STEP_DURATION;
-
+      
       cards.slice(0, step).forEach((_, i) => {
         const animationParams = {
         scale: 0.9 - 0.05 * (step - i),
@@ -590,7 +632,7 @@ const resolved = await Promise.all(
         );
       });
 
-      timeline.addLabel(`card-${step}`, segmentTime);
+      
       // card entry animation
       timeline.to(
         cards[step],
@@ -601,6 +643,8 @@ const resolved = await Promise.all(
         },
         segmentTime,
       );
+      timeline.addLabel(`card-${step}-start`, segmentTime);
+      timeline.addLabel(`card-${step}-end`, segmentTime + STEP_DURATION);
     });
 
     const getScrollDistance = () => totalDuration * window.innerHeight;
@@ -623,6 +667,18 @@ const resolved = await Promise.all(
         ease: 'power1.inOut',
       },
       animation: timeline,
+      // Unlock "see all" once the user has scrolled past every
+      // initially visible card. Progress hits 1 at the end of the
+      // spacer's scroll distance (i.e. card-2-end).
+      onUpdate: (self) => {
+        if (self.progress < 1) return;
+        const btn = document.querySelector<HTMLElement>(
+          '[data-experience-see-all]',
+        );
+        if (btn?.hasAttribute('disabled')) {
+          btn.removeAttribute('disabled');
+        }
+      },
       onRefresh: () => {
         // Spacer height = scroll distance so the page has enough scroll
         // room to drive the animation end-to-end.
@@ -723,12 +779,14 @@ const resolved = await Promise.all(
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const toggle = target.closest<HTMLElement>('[data-experience-toggle]');
-      if (toggle) {
+      const techs = document.querySelectorAll<HTMLElement>('.experience__card-tech');
+      if (toggle) { // open
         e.stopPropagation();
         const id = toggle.getAttribute('data-experience-toggle');
         document
           .getElementById(`experienceCard-${id}`)
           ?.classList.toggle('is-expanded');
+
         return;
       }
       const close = target.closest<HTMLElement>('[data-experience-close]');
@@ -738,17 +796,41 @@ const resolved = await Promise.all(
         document
           .getElementById(`experienceCard-${id}`)
           ?.classList.remove('is-expanded');
+          // make it instant to the techs
+          techs.forEach((tech) => { tech.style.transitionDelay = '0ms'; });
+          setTimeout(() => {
+            // restore the original delay after a short time
+            techs.forEach((tech) => {
+              const delay = tech.getAttribute('data-delay');
+              if (delay) {
+                tech.style.transitionDelay = `${delay}ms`;
+              }
+            });
+          }, 5);
         return;
       }
       const card = target.closest<HTMLElement>(
         '.experience__card.is-expanded',
       );
+      
+      
       if (
         card &&
         !target.closest('.experience__card-content') &&
         !target.closest('.experience__card-overlay')
       ) {
         card.classList.remove('is-expanded');
+        // make it instant to the techs
+        techs.forEach((tech) => { tech.style.transitionDelay = '0ms'; });
+        setTimeout(() => {
+          // restore the original delay after a short time
+          techs.forEach((tech) => {
+            const delay = tech.getAttribute('data-delay');
+            if (delay) {
+              tech.style.transitionDelay = `${delay}ms`;
+            }
+          });
+        }, 5);
       }
     });
   };

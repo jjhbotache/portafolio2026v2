@@ -1,0 +1,858 @@
+---
+import { getCollection, render } from 'astro:content';
+import { t, type Lang } from '../../i18n/utils';
+import { resolve } from '../../lib/collectionHelpers';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props as Props;
+
+// UI strings localised at build time; the runtime swap uses the [data-lang]
+// toggle plus the live <html data-lang>. The small pill labels mirror the
+// dictionaries in i18n/utils.ts so they match every other section.
+const uiStrings = {
+  close: lang === 'en' ? 'Close' : 'Cerrar',
+  loading: lang === 'en' ? 'VIDEO LOADING…' : 'CARGANDO VIDEO…',
+  techs: t(lang, 'project.technologies'),
+  links: t(lang, 'project.links'),
+  youtube: lang === 'en' ? 'Watch on YouTube' : 'Ver en YouTube',
+};
+
+// Pull every non-hidden project. Same filter as Projects.astro so the sheet
+// can't open a card that isn't visible in the listing.
+const projects = (await getCollection('projects'))
+  .filter((p) => !p.data.hidden)
+  .sort((a, b) => (a.data.importance ?? 0) - (b.data.importance ?? 0));
+
+// Pre-render every project body once at build time using Astro's official
+// `render(entry)` helper. Each `Content` component is mounted inside a
+// hidden <article data-sheet-content="<id>"> panel; the runtime swap just
+// toggles `aria-hidden` to choose which one is visible. This avoids
+// re-implementing Astro's renderToString (which is internal-only and takes
+// more args than the public surface exposes).
+const resolvedEntries = await Promise.all(
+  projects.map(async (entry) => {
+    const { Content } = await render(entry);
+    return {
+      id: entry.id,
+      Content,
+      title: entry.data.title,
+      description: entry.data.description,
+      img: entry.data.img,
+      techs: entry.data.technologies,
+      video: entry.data.video ?? '',
+      links: entry.data.links.map((l) => ({
+        url: l.url,
+        label: l.label,
+      })),
+    };
+  }),
+);
+---
+
+<!-- Sheet lives next to its siblings instead of inside #projects so it is
+     NOT trapped by the section's `pin: true` ScrollTrigger. Mounting it in
+     `index.astro` outside the <main> works because Astro is MPA — the script
+     bundle runs once per page load and the DOM the sheet queries is the
+     freshly hydrated document tree. -->
+<div
+  class="project-sheet"
+  data-project-sheet
+  data-state="closed"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="project-sheet-title"
+  aria-hidden="true"
+>
+  <div class="project-sheet__backdrop" data-project-sheet-close></div>
+
+  <div class="project-sheet__panel">
+    <!-- Drag affordance, purely visual; clicks bubble up to the close button. -->
+    <div class="project-sheet__handle" aria-hidden="true"></div>
+
+    <button
+      type="button"
+      class="project-sheet__close"
+      data-project-sheet-close
+      aria-label={uiStrings.close}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+
+    <div class="project-sheet__scroll" data-project-sheet-scroll>
+      <!-- One panel layer per project. Only the active one (aria-hidden=false)
+           is visible; the rest are display:none so their content takes no
+           space and any YT iframes (injected lazily) don't render offscreen.
+           The <span data-lang="…"> children inside each panel react to the
+           <html data-lang> toggle through CSS — no JS swap required. -->
+      {resolvedEntries.map((entry) => {
+        const watchUrl = entry.video
+          ? `https://www.youtube.com/watch?v=${entry.video}`
+          : '#';
+        return (
+          <article
+            class="project-sheet__content"
+            data-contentid={entry.id}
+            data-video-id={entry.video}
+            data-title={JSON.stringify(entry.title)}
+            data-description={JSON.stringify(entry.description)}
+          >
+            <header class="project-sheet__header">
+              <div class="project-sheet__media-wrap">
+                <!-- Cover image for the project. Lazy because cards in the
+                     listing already preload their own copies. -->
+                <img
+                  class="project-sheet__image"
+                  src={entry.img}
+                  alt={resolve(entry.title, lang)}
+                  loading="lazy"
+                  decoding="async"
+                />
+
+                <!-- YouTube host. The runtime injects the iframe lazily on
+                     open using the 400 % / -150 % trick that the rest of
+                     the site already uses for the Experience cards. -->
+                <div class="project-sheet__yt-host" data-yt-host>
+                  <div class="project-sheet__yt-loading">
+                    <span data-lang="es">{uiStrings.loading}</span>
+                    <span data-lang="en">{uiStrings.loading}</span>
+                  </div>
+                </div>
+
+                <a
+                  class="project-sheet__yt-link"
+                  data-yt-link
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={watchUrl}
+                  aria-label={uiStrings.youtube}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                  </svg>
+                  <span>{uiStrings.youtube}</span>
+                </a>
+              </div>
+
+              <div class="project-sheet__heading">
+                <h2
+                  class="project-sheet__title"
+                  id='project-sheet-title'
+                >
+                  <span data-lang="es">{resolve(entry.title, 'es')}</span>
+                  <span data-lang="en">{resolve(entry.title, 'en')}</span>
+                </h2>
+                <p class="project-sheet__description">
+                  <span data-lang="es">{resolve(entry.description, 'es')}</span>
+                  <span data-lang="en">{resolve(entry.description, 'en')}</span>
+                </p>
+              </div>
+            </header>
+
+            <section class="project-sheet__body">
+              <entry.Content />
+            </section>
+
+            <section class="project-sheet__meta">
+              <h3 class="project-sheet__meta-title">
+                <span data-lang="es">{uiStrings.techs}</span>
+                <span data-lang="en">{uiStrings.techs}</span>
+              </h3>
+              <ul class="project-sheet__techs">
+                {(entry.techs.es ?? []).map((tech, i) => (
+                  <li class="project-sheet__tech">
+                    <span data-lang="es">{tech}</span>
+                    <span data-lang="en">{entry.techs.en?.[i] ?? tech}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <footer class="project-sheet__footer">
+              <h3 class="project-sheet__meta-title">
+                <span data-lang="es">{uiStrings.links}</span>
+                <span data-lang="en">{uiStrings.links}</span>
+              </h3>
+              <div class="project-sheet__ctas">
+                {entry.links.map((link) => (
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="project-sheet__cta"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                      {link.url.startsWith('https://github.com') ? (
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                      ) : /mediafire|\.apk$/.test(link.url) ? (
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                      ) : (
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+                      )}
+                    </svg>
+                    <span data-lang="es">{resolve(link.label, 'es')}</span>
+                    <span data-lang="en">{resolve(link.label, 'en')}</span>
+                  </a>
+                ))}
+              </div>
+            </footer>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ─── shell ───────────────────────────────────────────────────────── */
+  .project-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--t-med) var(--ease-out);
+  }
+
+  .project-sheet[data-state='closed'] {
+    visibility: hidden;
+  }
+
+  .project-sheet[data-state='opening'],
+  .project-sheet[data-state='open'] {
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .project-sheet[data-state='closing'] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ─── backdrop ────────────────────────────────────────────────────── */
+  .project-sheet__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 10, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity var(--t-med) var(--ease-out);
+  }
+  .project-sheet[data-state='open'] .project-sheet__backdrop,
+  .project-sheet[data-state='opening'] .project-sheet__backdrop {
+    opacity: 1;
+  }
+
+  /* ─── panel ──────────────────────────────────────────────────────── */
+  .project-sheet__panel {
+    position: relative;
+    margin: 0 auto;
+    width: min(1100px, 100vw);
+    max-height: 90vh;
+    background: rgba(8, 12, 24, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: none;
+    color: var(--c-text);
+    font-family: var(--ff-pixeloid);
+    overflow: hidden;
+    transform: translateY(102%);
+    transition: transform var(--t-med) var(--ease-out);
+    box-shadow: 0 -1rem 3rem rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .project-sheet[data-state='open'] .project-sheet__panel,
+  .project-sheet[data-state='opening'] .project-sheet__panel {
+    transform: translateY(0);
+  }
+
+  /* The drag handle is purely decorative. Implemented as a small pill at
+     the top of the panel so the user knows it slides. */
+  .project-sheet__handle {
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 2;
+  }
+
+  .project-sheet__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--c-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    transition: background var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out);
+  }
+  .project-sheet__close:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(0.95);
+  }
+  .project-sheet__close svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* The scroll container holds every per-project <article>. Only one is
+     visible at a time; CSS swaps via [aria-hidden]. The scroll position
+     resets each open so the user always sees the header first. */
+  .project-sheet__scroll {
+    overflow-y: auto;
+    padding: 2rem clamp(1rem, 3vw, 2.5rem) 2.5rem;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  .project-sheet__scroll::-webkit-scrollbar { width: 8px; }
+  .project-sheet__scroll::-webkit-scrollbar-track { background: transparent; }
+  .project-sheet__scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+  }
+
+  .project-sheet__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .project-sheet__content[aria-hidden='true'] {
+    display: none;
+  }
+
+  /* ─── header / media ─────────────────────────────────────────────── */
+  .project-sheet__header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .project-sheet__media-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.5);
+  }
+
+  .project-sheet__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* YouTube host covers the media wrap. Hidden until the active panel is
+     shown. While no iframe is present the "VIDEO LOADING…" pill displays;
+     once injected the pill hides and the player paints. */
+  .project-sheet__yt-host {
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+  .project-sheet__content[aria-hidden='false'] .project-sheet__yt-host {
+    display: block;
+  }
+  /* The 400 % / -150 % trick pushes the YT UI off-canvas. Only the centred
+     video stays visible inside the host. Replicated from the Experience
+     iframe pattern that already worked in this codebase. */
+  .project-sheet__yt-host iframe {
+    width: 400% !important;
+    height: 100% !important;
+    margin-left: -150% !important;
+    border: 0 !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+  }
+  .project-sheet__yt-host iframe .ytmVideoInfoVideoTitle { display: none !important; }
+
+  .project-sheet__yt-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.65);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.6rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.25rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity var(--t-fast) var(--ease-out);
+  }
+  .project-sheet__yt-host.has-iframe .project-sheet__yt-loading { opacity: 0; }
+
+  .project-sheet__yt-link {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.3rem;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-fast) var(--ease-out),
+                background var(--t-fast) var(--ease-out);
+    text-decoration: none;
+  }
+  .project-sheet__yt-link:hover {
+    background: rgba(220, 38, 38, 0.9);
+  }
+  .project-sheet__yt-link svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+  .project-sheet__yt-host.has-iframe ~ .project-sheet__yt-link {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .project-sheet__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .project-sheet__title {
+    margin: 0;
+    font-family: var(--ff-pixeloid);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    background: linear-gradient(120deg, #e3fffc 0%, #b790ff 65%, #b6fffa 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+  }
+  .project-sheet__description {
+    margin: 0;
+    font-family: var(--ff-geist-pixel);
+    font-size: 0.9rem;
+    color: var(--c-text-muted);
+    line-height: 1.55;
+  }
+
+  /* ─── body markdown ──────────────────────────────────────────────── */
+  .project-sheet__body {
+    font-family: var(--ff-geist-pixel);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--c-text);
+  }
+  .project-sheet__body :global(h1),
+  .project-sheet__body :global(h2),
+  .project-sheet__body :global(h3),
+  .project-sheet__body :global(h4) {
+    font-family: var(--ff-pixeloid);
+    color: var(--c-secondary);
+    margin: 1.25rem 0 0.5rem;
+  }
+  .project-sheet__body :global(p) { margin: 0.6rem 0; }
+  .project-sheet__body :global(a) {
+    color: var(--c-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .project-sheet__body :global(ul),
+  .project-sheet__body :global(ol) {
+    padding-left: 1.4rem;
+    margin: 0.5rem 0;
+  }
+  .project-sheet__body :global(code) {
+    background: rgba(0, 181, 232, 0.12);
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+  }
+  .project-sheet__body :global(pre) {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.85rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+  .project-sheet__body :global(blockquote) {
+    margin: 0.75rem 0;
+    padding-left: 0.85rem;
+    border-left: 3px solid var(--c-secondary);
+    color: var(--c-text-muted);
+  }
+  .project-sheet__body :global(img) {
+    max-width: 100%;
+    border-radius: 0.5rem;
+  }
+
+  /* ─── meta + techs ──────────────────────────────────────────────── */
+  .project-sheet__meta,
+  .project-sheet__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .project-sheet__meta-title {
+    margin: 0;
+    font-family: var(--ff-pixeloid);
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+  .project-sheet__techs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .project-sheet__tech {
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(0, 181, 232, 0.12);
+    border: 1px solid rgba(0, 181, 232, 0.3);
+    color: var(--c-secondary);
+    font-family: var(--ff-geist-pixel);
+    font-size: 0.75rem;
+  }
+
+  /* ─── footer CTAs ───────────────────────────────────────────────── */
+  .project-sheet__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .project-sheet__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--c-text);
+    font-family: var(--ff-pixeloid);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    transition: background var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out),
+                border-color var(--t-fast) var(--ease-out);
+  }
+  .project-sheet__cta:hover {
+    background: rgba(0, 181, 232, 0.2);
+    border-color: var(--c-secondary);
+    transform: translateY(-1px);
+  }
+  .project-sheet__cta svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  /* ─── responsive ─────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .project-sheet__panel {
+      max-height: 92vh;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+    }
+    .project-sheet__scroll {
+      padding: 1.5rem 1rem 2rem;
+    }
+    .project-sheet__yt-link {
+      font-size: 0.6rem;
+    }
+  }
+</style>
+
+<script>
+  const sheet = document.querySelector<HTMLElement>('[data-project-sheet]');
+  const panel = sheet?.querySelector<HTMLElement>('.project-sheet__panel');
+  const scrollEl = sheet?.querySelector<HTMLElement>('[data-project-sheet-scroll]');
+  const contents = sheet
+    ? Array.from(sheet.querySelectorAll<HTMLElement>('[data-contentid]'))
+    : [];
+
+  if (sheet && panel && scrollEl && contents.length > 0) {
+    let activeId: string | null = null;
+    let lastTrigger: HTMLElement | null = null;
+    let closingTimer: number | null = null;
+
+    const getLang = (): 'es' | 'en' => {
+      const v = document.documentElement.getAttribute('lang');
+      return v === 'en' ? 'en' : 'es';
+    };
+
+
+    const getBilingual = (el: HTMLElement, attr: string, lang: 'es' | 'en'): string => {
+      const raw = el.dataset[attr];
+      if (!raw) return '';
+      try {
+        const obj = JSON.parse(raw);
+        return obj[lang] ?? '';
+      } catch {
+        return raw;
+      }
+    };
+
+    const tearDownIframe = (host: HTMLElement) => {
+      host.querySelectorAll('iframe').forEach((node) => {
+        const el = node as HTMLIFrameElement;
+        try {
+          el.contentWindow?.postMessage(
+            '{"event":"command","func":"stopVideo","args":""}',
+            '*',
+          );
+        } catch (_) {
+          /* cross-origin frame, nothing to do */
+        }
+        el.src = 'about:blank';
+        el.remove();
+      });
+      host.classList.remove('has-iframe');
+    };
+
+    const ensureIframe = (panelEl: HTMLElement) => {
+      const host = panelEl.querySelector<HTMLElement>('[data-yt-host]');
+      if (!host) return;
+      // If we already injected one, nothing to do.
+      if (host.querySelector('iframe')) {
+        host.classList.add('has-iframe');
+        return;
+      }
+      const videoId = panelEl.dataset.videoId;
+      if (!videoId) {
+        host.classList.remove('has-iframe');
+        return;
+      }
+      const lang = getLang();
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&controls=0&cc_lang_pref=${lang}&loop=1&autoplay=1`;
+      iframe.allow = 'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', 'true');
+      iframe.loading = 'lazy';
+      // Set title from the project's heading so AT users get useful info.
+      const currentLang = getLang();
+      iframe.title = getBilingual(panelEl, 'title', currentLang);
+      host.appendChild(iframe);
+      // Tiny RAF so the loading pill has a chance to paint first.
+      requestAnimationFrame(() => host.classList.add('has-iframe'));
+    };
+
+    const showPanel = (panelEl: HTMLElement) => {
+      contents.forEach((node) => {
+        const isActive = node === panelEl;
+        node.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+      // Reset scroll to the top of the new panel so the user sees the
+      // header / hero image first instead of where the previous panel was.
+      scrollEl.scrollTop = 0;
+      // Build iframe on demand and tear down all the others so the YT
+      // player is only running for the visible card.
+      ensureIframe(panelEl);
+      contents.forEach((node) => {
+        if (node !== panelEl) {
+          const host = node.querySelector<HTMLElement>('[data-yt-host]');
+          if (host) tearDownIframe(host);
+        }
+      });
+      // Promote the active panel for GPU compositing while it's on stage.
+      panelEl.style.willChange = 'transform';
+    };
+
+    const hideAllIframes = () => {
+      contents.forEach((node) => {
+        const host = node.querySelector<HTMLElement>('[data-yt-host]');
+        if (host) tearDownIframe(host);
+      });
+    };
+
+    const disableScrollTriggers = () => {
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+        ScrollTrigger.getAll().forEach((t) => t.disable(false));
+      });
+    };
+
+    const enableScrollTriggers = () => {
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+        ScrollTrigger.getAll().forEach((t) => t.enable(false));
+      });
+    };
+
+    const openForId = (projectID: string) => {
+      const panelEl = contents.find((content) => content.dataset.contentid === projectID) ?? null;
+      if (!panelEl) return;
+
+      const state = sheet.dataset.state ?? 'closed';
+      // If the sheet is already showing the requested project, do nothing.
+      if ((state === 'open' || state === 'opening') &&
+          activeId === panelEl.dataset.contentid) {
+        return;
+      }
+      // If a different project is currently open, close-then-reopen so the
+      // user sees a clean transition.
+      if ((state === 'open' || state === 'opening') &&
+          activeId !== panelEl.dataset.contentid) {
+        actuallyClose(() => actuallyOpen(panelEl));
+        return;
+      }
+
+      actuallyOpen(panelEl);
+    };
+
+    const actuallyOpen = (panelEl: HTMLElement) => {
+      if (closingTimer) {
+        window.clearTimeout(closingTimer);
+        closingTimer = null;
+      }
+      showPanel(panelEl);
+      activeId = panelEl.dataset.contentid ?? null;
+      sheet.dataset.state = 'opening';
+      sheet.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(() => {
+        sheet.dataset.state = 'open';
+        const closeBtn = sheet.querySelector<HTMLButtonElement>('.project-sheet__close');
+        closeBtn?.focus({ preventScroll: true });
+      });
+      lastTrigger =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      disableScrollTriggers();
+    };
+
+    const actuallyClose = (after?: () => void) => {
+      const state = sheet.dataset.state ?? 'closed';
+      if (state === 'closed' || state === 'closing') {
+        after?.();
+        return;
+      }
+      sheet.dataset.state = 'closing';
+      sheet.setAttribute('aria-hidden', 'true');
+      // Match the panel transition (~var(--t-med) = 380 ms) before tearing
+      // down iframes and re-enabling ScrollTriggers.
+      closingTimer = window.setTimeout(() => {
+        sheet.dataset.state = 'closed';
+        hideAllIframes();
+        enableScrollTriggers();
+        closingTimer = null;
+        if (lastTrigger && document.contains(lastTrigger)) {
+          lastTrigger.focus({ preventScroll: true });
+        }
+        lastTrigger = null;
+        activeId = null;
+        after?.();
+      }, 380);
+    };
+
+    // ─── open / close triggers ─────────────────────────────────────
+    window.addEventListener('portafolio:open-sheet', (event) => {
+      const detail = (event as CustomEvent<{ id?: string }>).detail;
+      if (!detail?.id) return;
+      
+      openForId(detail.id);
+    });
+
+    // Generic close bound: any [data-project-sheet-close] inside the sheet
+    // triggers the close handler. The backdrop and the X button both carry
+    // this attribute so the same listener services both.
+    sheet.addEventListener('click', (e) => {
+      const target = e.target as Element | null;
+      if (target?.closest('[data-project-sheet-close]')) {
+        e.preventDefault();
+        actuallyClose();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (sheet.dataset.state !== 'open') return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        actuallyClose();
+      } else if (e.key === 'Tab') {
+        // Focus trap: keep tabbing inside the sheet's panel only.
+        const focusables = panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    // ─── language change ────────────────────────────────────────────
+    // The lang toggle in Base.astro dispatches this event on `window`.
+    // Every text element already has <span data-lang> pairs that CSS shows
+    // or hides — only the YouTube cc_lang_pref needs a runtime refresh.
+    window.addEventListener('portafolio:lang', () => {
+      if (sheet.dataset.state !== 'open' && sheet.dataset.state !== 'opening') {
+        return;
+      }
+      if (!activeId) return;
+      const activePanel = contents.find((n) => n.dataset.contentid === activeId);
+      if (!activePanel) return;
+      const host = activePanel.querySelector<HTMLElement>('[data-yt-host]');
+      const iframe = host?.querySelector<HTMLIFrameElement>('iframe');
+      const videoId = activePanel.dataset.videoId;
+      const lang = getLang();
+      if (iframe && videoId) {
+        iframe.src = `https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&controls=0&cc_lang_pref=${lang}&loop=1&autoplay=1`;
+        iframe.title = getBilingual(activePanel, 'title', lang);
+      }
+    });
+
+    // Initially: the SSR rendered the first panel as visible. Tear its
+    // YT iframe down so the player doesn't run while the sheet is closed.
+    hideAllIframes();
+  }
+</script>
+</content>
+</invoke>

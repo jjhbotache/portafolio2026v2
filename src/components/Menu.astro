@@ -222,7 +222,17 @@ const homeAria = t(lang, 'nav.menu.homeAria');
   const scrollToSection = (sectionId: string) => {
     const target = document.getElementById(sectionId);
     if (!target) return;
-    const top = target.getBoundingClientRect().top + window.scrollY;
+    let addedOffset = 0;
+    if (sectionId === 'experienceDetailedView') {
+      addedOffset = 310;
+    } else if (sectionId === 'about') {
+      addedOffset = 700;
+    } else if (sectionId === 'projects') {
+      addedOffset = 700;
+    } else if (sectionId === 'contact') {
+    }
+    
+    const top = target.getBoundingClientRect().top + window.scrollY + addedOffset;
     window.scrollTo({ top, behavior: 'smooth' });
   };
 

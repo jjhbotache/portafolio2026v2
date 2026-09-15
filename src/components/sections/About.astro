@@ -101,7 +101,7 @@ const duplicatedRows = technologyCategories.map((category) => ({
     box-sizing: content-box;
     width: max-content;
     white-space: nowrap;
-    animation: marquee-scroll 65s linear infinite;
+    animation: marquee-scroll 200s linear infinite;
     animation-play-state: paused;
   }
   .about.is-active .about__marquee-track {
@@ -161,7 +161,7 @@ const duplicatedRows = technologyCategories.map((category) => ({
     border-radius: 1em;
     padding: 1rem ;
     --dark-color: 0;
-    background: rgba(var(--dark-color), var(--dark-color), var(--dark-color), 0.3);
+    background: rgba(var(--dark-color), var(--dark-color), var(--dark-color), 0.7);
     box-shadow: 0 0 2rem rgba(var(--dark-color), var(--dark-color), var(--dark-color),0.8);
     text-align: center;
   }
@@ -329,7 +329,7 @@ const duplicatedRows = technologyCategories.map((category) => ({
       scroller: window,
       pin: true,
       start: 'top top',
-      end: '+=10000',
+      end: '+=5000',
       scrub: 0.5,
       animation: tl,
       snap: {

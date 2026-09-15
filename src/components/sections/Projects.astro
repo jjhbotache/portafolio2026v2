@@ -2,6 +2,7 @@
 import { t, type Lang } from '../../i18n/utils';
 import { getCollection } from 'astro:content';
 import { resolve } from '../../lib/collectionHelpers';
+import ProjectSheet from './ProjectSheet.astro';
 
 interface Props {
   lang: Lang;
@@ -26,92 +27,26 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
        inner track is duplicated so the columns can loop without a visible
        jump. -->
   <div class="projects__columns" data-projects-columns>
-    {columns.map((col, colIndex) => (
+    {columns.map((col) => (
       <div
         class="projects__column"
         data-projects-column
-        data-column={colIndex}
-        data-direction={colIndex % 2 === 0 ? 'up' : 'down'}
       >
         <div class="projects__column-track">
-          {col.map((proj, index) => {
-            const titleEs = resolve(proj.data.title, 'es');
-            const titleEn = resolve(proj.data.title, 'en');
-            const descEs = resolve(proj.data.description, 'es');
-            const descEn = resolve(proj.data.description, 'en');
-            const techEs = (proj.data.technologies.es ?? []).slice(0, 4);
-            const techEn = (proj.data.technologies.en ?? []).slice(0, 4);
-            // First card in each column is the one most likely to be the
-            // LCP element when Projects enters the viewport. Load it eagerly
-            // with high fetchpriority so the browser doesn't compete with
-            // late-discovered scripts for that image.
-            const isFirstInColumn = index === 0;
-            return (
-              <article class="projects__card" data-projects-card data-hover={t(lang, 'sections.projects.hover')} >
-                <a
-                  href={proj.data.video?.startsWith('http') ? proj.data.video : '#'}
-                  target={proj.data.video?.startsWith('http') ? '_blank' : undefined}
-                  rel="noopener noreferrer"
-                  class="projects__card-media"
-                >
-                  <img
-                    src={proj.data.img}
-                    alt={titleEs}
-                    class="projects__card-image"
-                    loading={isFirstInColumn ? 'eager' : 'lazy'}
-                    decoding="async"
-                    fetchpriority={isFirstInColumn ? 'high' : 'auto'}
-                  />
-                </a>
-                <div class="projects__card-body">
-                  <h3 class="projects__card-title">
-                    <span data-lang="es">{titleEs}</span>
-                    <span data-lang="en">{titleEn}</span>
-                  </h3>
-                  <p class="projects__card-description">
-                    <span data-lang="es">{descEs}</span>
-                    <span data-lang="en">{descEn}</span>
-                  </p>
-                  <div class="projects__card-techs">
-                    {techEs.map((_, i) => (
-                      <span class="projects__card-tech">
-                        <span data-lang="es">{techEs[i]}</span>
-                        <span data-lang="en">{techEn[i]}</span>
-                      </span>
-                    ))}
-                  </div>
-                  <div class="projects__card-links">
-                    {proj.data.links.map((link) => (
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="projects__card-link"
-                      >
-                        <span data-lang="es">{resolve(link.label, 'es')}</span>
-                        <span data-lang="en">{resolve(link.label, 'en')}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-          {col.map((proj) => {
+          {[0,0].map(()=>col.map((proj) => {
             const titleEs = resolve(proj.data.title, 'es');
             const titleEn = resolve(proj.data.title, 'en');
             const descEs = resolve(proj.data.description, 'es');
             const descEn = resolve(proj.data.description, 'en');
             return (
-              <article class="projects__card projects__card--clone" data-projects-card data-hover={t(lang, 'sections.projects.hover')}>
-                <a
-                  href={proj.data.video?.startsWith('http') ? proj.data.video : '#'}
-                  target={proj.data.video?.startsWith('http') ? '_blank' : undefined}
-                  rel="noopener noreferrer"
-                  class="projects__card-media"
-                  aria-hidden="true"
-                  tabindex="-1"
-                >
+              // Clone card: NO data-project-index, NO role/tabindex, so the
+              // delegated sheet opener skips it. It exists only to feed the
+              // looping column-track visual. The original used <a> for the
+              // media stage but the real card now triggers the sheet via
+              // click; mirrors must match (else the browser drops the body
+              // siblings of an orphan closing tag and the card renders empty).
+              <article id={proj.id} class="projects__card projects__card--clone" data-projects-card data-hover={t(lang, 'sections.projects.hover') }>
+                <div class="projects__card-media" aria-hidden="true">
                   <img
                     src={proj.data.img}
                     alt=""
@@ -120,24 +55,24 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
                     decoding="async"
                     fetchpriority="low"
                   />
-                </a>
+                </div>
                 <div class="projects__card-body">
                   <h3 class="projects__card-title">
-                    <span data-lang="es">{titleEs}</span>
-                    <span data-lang="en">{titleEn}</span>
+                    <span data-lang={lang}>{lang === 'es' ? titleEs : titleEn}</span>
                   </h3>
                   <p class="projects__card-description">
-                    <span data-lang="es">{descEs}</span>
-                    <span data-lang="en">{descEn}</span>
+                    <span data-lang={lang}>{lang === 'es' ? descEs : descEn}</span>
                   </p>
                 </div>
               </article>
             );
-          })}
+          }))}
         </div>
       </div>
     ))}
   </div>
+  
+  <ProjectSheet lang={lang} />
 </section>
 
 <style>
@@ -328,7 +263,7 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
     flex-direction: column;
     gap: 0.5rem;
   }
-
+  
   .projects__card-title {
     margin: 0;
     font-family: var(--ff-pixeloid);
@@ -337,6 +272,7 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
   }
 
   .projects__card-description {
+    height: 3rem;
     margin: 0;
     font-size: 0.75rem;
     line-height: 1.45;
@@ -390,6 +326,21 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
   gsap.registerPlugin(ScrollTrigger);
 
   const init = () => {
+    
+    // prepare the cards to be pressed
+    document.querySelectorAll('[data-projects-card]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const id = card.id;
+        const event = new CustomEvent('portafolio:open-sheet', {
+          detail: { id },
+          bubbles: true,
+        });
+        window.dispatchEvent(event);
+        console.log(`dispched event:`,event);
+        
+      });
+    });
+    
     const columns = Array.from(
       document.querySelectorAll<HTMLElement>('[data-projects-column]'),
     );
@@ -449,6 +400,12 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
       onLeave: demoteColumns,
       onLeaveBack: demoteColumns,
     });
+    
+    // launchan setup event for the ProjectSheetAstro to listen to and setup its own ScrollTrigger
+    const setupEvent = new CustomEvent('portafolio:setup-sheet', {
+      bubbles: true,
+    });
+    window.dispatchEvent(setupEvent);
   };
 
 
