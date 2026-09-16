@@ -336,7 +336,6 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
           bubbles: true,
         });
         window.dispatchEvent(event);
-        console.log(`dispched event:`,event);
         
       });
     });
@@ -401,11 +400,6 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
       onLeaveBack: demoteColumns,
     });
     
-    // launchan setup event for the ProjectSheetAstro to listen to and setup its own ScrollTrigger
-    const setupEvent = new CustomEvent('portafolio:setup-sheet', {
-      bubbles: true,
-    });
-    window.dispatchEvent(setupEvent);
   };
 
 

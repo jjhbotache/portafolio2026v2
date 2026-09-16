@@ -496,13 +496,17 @@ const resolved = entries.map((entry) => {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--c-secondary);
-    transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+    background-color: rgba(17, 0, 255, 0.3);
+    box-shadow: 0 0 1rem var(--c-secondary);
+    transition: all var(--t-fast) var(--ease-out);
   }
   .experience__see-all:hover {
     background: var(--c-secondary);
     color: var(--c-bg);
   }
   .experience__see-all:disabled {
+    box-shadow: none;
+    background-color: none;
     opacity: 0.9;
     cursor: not-allowed;
     border-color: rgb(171, 171, 171);
