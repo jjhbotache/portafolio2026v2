@@ -1,7 +1,6 @@
 ---
 import { t, type Lang } from '../../i18n/utils';
 import { getCollection } from 'astro:content';
-import { resolve } from '../../lib/collectionHelpers';
 import ProjectSheet from './ProjectSheet.astro';
 
 interface Props {
@@ -12,65 +11,48 @@ const { lang } = Astro.props as Props;
 const projects = (await getCollection('projects'))
   .filter((p) => !p.data.hidden)
   .sort((a, b) => (a.data.importance ?? 0) - (b.data.importance ?? 0));
+  
+const parsedProjects = projects.map((proj) => {
+  const title = proj.data.title[lang];
+  const description = proj.data.description[lang];
+  const technologies = proj.data.technologies?.[lang] ?? [];
+  const content = proj.data.content[lang];
+  return {
+    id: proj.id,
+    data: {
+      title,
+      description,
+      img: proj.data.img,
+      video: proj.data.video,
+      technologies,
+      links: proj.data.links.map((link) => ({
+        url: link.url,
+        label: link.label[lang],
+      })),
+      content,
+    },
+    texts :{
+      hover: t(lang, 'sections.projects.hover')
+    }
+  };
+});
 
 // Distribute projects across N columns; each column scrolls at a different
 // speed so the section feels layered. 4 columns is a sweet spot for desktop
 // and collapses to 2 on tablet, 1 on mobile.
-const NUM_COLUMNS = 3;
-const columns: typeof projects[] = Array.from({ length: NUM_COLUMNS }, () => []);
-projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
 ---
-<section class="projects bg-projects" data-section="projects" id="projects">
+<section class="projects" data-section="projects" id="projects">
   <h2 class="projects__title" data-projects-title data-lang={lang}> {t(lang, 'sections.projects.title')} </h2>
 
   <!-- Each column scrolls at its own speed (irregular) and direction. The
        inner track is duplicated so the columns can loop without a visible
        jump. -->
-  <div class="projects__columns" data-projects-columns>
-    {columns.map((col) => (
-      <div
-        class="projects__column"
-        data-projects-column
-      >
-        <div class="projects__column-track">
-          {[0,0].map(()=>col.map((proj) => {
-            const titleEs = resolve(proj.data.title, 'es');
-            const titleEn = resolve(proj.data.title, 'en');
-            const descEs = resolve(proj.data.description, 'es');
-            const descEn = resolve(proj.data.description, 'en');
-            return (
-              // Clone card: NO data-project-index, NO role/tabindex, so the
-              // delegated sheet opener skips it. It exists only to feed the
-              // looping column-track visual. The original used <a> for the
-              // media stage but the real card now triggers the sheet via
-              // click; mirrors must match (else the browser drops the body
-              // siblings of an orphan closing tag and the card renders empty).
-              <article id={proj.id} class="projects__card projects__card--clone" data-projects-card data-hover={t(lang, 'sections.projects.hover') }>
-                <div class="projects__card-media" aria-hidden="true">
-                  <img
-                    src={proj.data.img}
-                    alt=""
-                    class="projects__card-image"
-                    loading="lazy"
-                    decoding="async"
-                    fetchpriority="low"
-                  />
-                </div>
-                <div class="projects__card-body">
-                  <h3 class="projects__card-title">
-                    <span data-lang={lang}>{lang === 'es' ? titleEs : titleEn}</span>
-                  </h3>
-                  <p class="projects__card-description">
-                    <span data-lang={lang}>{lang === 'es' ? descEs : descEn}</span>
-                  </p>
-                </div>
-              </article>
-            );
-          }))}
-        </div>
-      </div>
-    ))}
+  <div class="projects__columns" data-projects-columns> 
+    <!-- injected projects -->
   </div>
+  
+  <!-- save projects with js -->
+   <script is:inline type="application/json" id="projects-data" set:html={JSON.stringify(parsedProjects)}/>
   
   <ProjectSheet lang={lang} />
 </section>
@@ -89,9 +71,12 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
   @property --grad3-y { syntax: '<percentage>'; inherits: true; initial-value: 30%; }
   @property --grad4-x { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
   @property --grad4-y { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+    
+  @property --perspective { syntax: '<length>'; inherits: true; initial-value: 200px; }
 
   .projects {
     position: relative;
+    overflow: hidden;
     width: 100%;
     height: 100vh;       
     padding: 4rem var(--shell-pad-x) 8rem;
@@ -102,12 +87,20 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
     radial-gradient(at var(--grad2-x) var(--grad2-y), hsla(193, 100%, 45%, .7) 0px, transparent 50%),
     radial-gradient(at var(--grad3-x) var(--grad3-y), hsla(279, 76%, 50%, .7) 0px, transparent 50%),
     radial-gradient(at var(--grad4-x) var(--grad4-y), hsla(180,99%,79%,1) 0px, transparent 50%);
-    animation: gradientMove 3s linear infinite;
     
-    perspective: 500px;
+    
+    perspective: var(--perspective);
     perspective-origin: bottom center;
+    transform-style: preserve-3d;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
             mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
+  }
+  
+  /* only add animation for desktop */
+  @media (min-width: 768px) {
+    .projects {
+      animation: gradientMove 3s linear infinite;
+    }
   }
 
   @keyframes gradientMove {
@@ -134,72 +127,61 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
     font-family: var(--ff-pixeloid);
     font-size: clamp(2.5rem, 8vw, 5.5rem);
     letter-spacing: 0.04em;
-    background: linear-gradient(120deg, #e3fffc 0%, #b790ff 65%, #b6fffa 100%);
+    background: linear-gradient(to bottom right, var(--c-primary) 0%, var(--c-violet-deep) 65%, var(--c-primary-deep) 100%);
+    text-shadow: 0 0 20px rgba(0, 181, 232, 0.15);
     -webkit-background-clip: text;
             background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
     line-height: 1.3;
     white-space: nowrap;
-    text-shadow: 0 0 30px rgba(0, 181, 232, 0.15);
   }
 
-  /* define a property */
-  @property --rotation-x-deg {
-    syntax: '<angle>';
-    inherits: true;
-    initial-value: 45deg;
-  }
-  
-  /* @keyframes rotateColumns {
-    0%, 100% { --rotation-x-deg: 0deg; }
-    50% { --rotation-x-deg: 25deg; }
-  } */
-  .projects__columns {
+  .projects__columns  {
     position: absolute;
     left: 0;
     bottom: 0;
     width: 100%;
     height: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    justify-content: center;
     gap: 2rem;
     margin: 0 auto;
-    
-    transform: rotateX(var(--rotation-x-deg)) translateY(150%);
-    /* animation: rotateColumns 5s ease 0s infinite normal; */
-  }
-  
-  
-  
 
+    align-items: flex-start;
+    /* transform: rotateX(30deg) translate(0,50%);    se establece con gsap */
+  }
+</style>
+
+<style is:global>
   .projects__column {
     position: relative;
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    gap: 2rem;
     border-radius: 0.5rem;
-    height: 70vh;
     z-index: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 90vw;
+    transform: translateY(5%);
   }
   .projects__column:hover { z-index: 2; }
 
-  .projects__column-track {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    perspective: 1000px;
-    perspective-origin: bottom center;
-  }
 
   .projects__card {
     background: rgba(8, 12, 24, 1);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 0.75rem;
     backdrop-filter: blur(6px);
+    width: 100%;
     
     font: var(--ff-geist-pixel);
     overflow: hidden;
     border-radius: 0.75rem;
     z-index: 1;
-    
+    transform-style: preserve-3d;
     
   }
   .projects__card:hover {
@@ -209,29 +191,30 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
     transform: scale(1.01) ;
     will-change: transform, z-index;
     box-shadow: 0 0 .5rem rgb(0, 0, 0);
-    transform-style: preserve-3d;
     z-index: 3;
   }
   
-  .projects__card::after {
-    display: none;
-    opacity: 0;
-    content: attr(data-hover);
-    position: absolute;
-    display: grid;
-    place-items: center;
-    font-family: var(--ff-pixeloid);
-    font-size: 2rem;
-    color: var(--c-text);
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(4px);
-    border-radius: 0.75rem;
-    text-shadow: 0 0 .4rem rgba(0, 0, 0, 0.5);
-    z-index: 4;
+  @media (width > 768px) {
+    .projects__card::after {
+      display: none;
+      opacity: 0;
+      content: attr(data-hover);
+      position: absolute;
+      display: grid;
+      place-items: center;
+      font-family: var(--ff-pixeloid);
+      font-size: 2rem;
+      color: var(--c-text);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 0.75rem;
+      text-shadow: 0 0 .4rem rgba(0, 0, 0, 0.5);
+      z-index: 4;
+    }
   }
   
   .projects__card:hover::after {
@@ -272,13 +255,19 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
   }
 
   .projects__card-description {
-    height: 3rem;
+    /* `max-height` (instead of `height`) lets the description grow naturally
+       when line-clamp works, and falls back to clipping after exactly 3 lines
+       worth of content if the browser doesn't honor line-clamp. The
+       multiplier matches the `line-height` below so the cutoff lands on a
+       line boundary, not in the middle of a line. */
+    max-height: calc(1.45em * 3);
     margin: 0;
     font-size: 0.75rem;
     line-height: 1.45;
     color: var(--c-text-muted);
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -310,13 +299,6 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
     text-underline-offset: 2px;
   }
   .projects__card-link:hover { color: var(--c-text); }
-
-  @media (max-width: 1100px) {
-    .projects__columns { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 640px) {
-    .projects__columns { grid-template-columns: 1fr; }
-  }
 </style>
 
 <script>
@@ -324,9 +306,104 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
+  
+  const lang = document.documentElement.lang as 'es' | 'en';
+  
+  
+  interface RawProject {
+  id: string;
+  data: {
+    title: string
+    description: string;
+    img: string;
+    hidden?: boolean;
+    importance?: number;
+    video?: string;
+    technologies?:  string[];
+    content?: string;
+    links: { url: string; label: string }[];
+  },
+  texts: {
+    hover: string;
+  }
+}
+  
 
+
+  // Breakpoints MUST match the CSS media queries at the bottom of this file
+  // (≤425px → 1 column, ≤768px → 2 columns, else 3). If the CSS changes, this
+  // function must change too, otherwise the columns rendered in the DOM will
+  // not match the columns the CSS is actually displaying.
+  const getColumnCount = (): number => {
+    const w = window.innerWidth;
+    if (w <= 425) return 1;
+    if (w <= 768) return 2;
+    return 3;
+  };
+
+
+  // Redistributes the original project cards (ignoring clones used for the
+  // scroll loop) across the first `cols` columns as evenly as possible, and
+  // empties the rest. Runs both on first load and on breakpoint changes.
+  // The DOM nodes of each column never change (so GSAP refs and ScrollTrigger
+  // keep working); only their child <article> elements are re-arranged.
+  const distribute = (cols: number, projects: RawProject[]) => {
+    const projectsContainer = document.querySelector<HTMLElement>('[data-projects-columns]');
+      
+    // create the cols and insert them
+    projectsContainer?.replaceChildren(
+      ...Array.from(
+        { length: cols },
+        () => {
+        const col = document.createElement('div');
+        col.className = 'projects__column';
+        col.setAttribute('data-projects-column', '');
+        return col;
+      }),
+    );
+    
+    // distribute the projects across the columns
+    
+    const projectsAmountByCol = Math.ceil(projects.length / cols);
+    const columns = document.querySelectorAll<HTMLElement>('[data-projects-column]');
+    columns.forEach((col, i) => {
+      col.replaceChildren(
+        ...projects.slice(i * projectsAmountByCol, (i + 1) * projectsAmountByCol).map((proj) => {
+          const card = `<article id="${proj.id}" class="projects__card" data-projects-card data-hover="${proj.texts.hover}">
+            <div class="projects__card-media" aria-hidden="true">
+              <img
+                src="${proj.data.img}"
+                alt=""
+                class="projects__card-image"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+              />
+            </div>
+            <div class="projects__card-body">
+              <h3 class="projects__card-title">
+                <span data-lang="${lang}">${proj.data.title}</span>
+              </h3>
+              <p class="projects__card-description">
+                <span data-lang="${lang}">${proj.data.description}</span>
+              </p>
+            </div>
+          </article>`;
+          return new DOMParser().parseFromString(card, 'text/html').body.firstChild as HTMLElement;
+        }),
+      );
+    }); 
+  };
+
+  const projectsData = JSON.parse(document.querySelector<HTMLElement>('#projects-data')?.innerHTML || '[]') as RawProject[];
+  const projectsWithClones = [...projectsData, ...projectsData.reverse().slice(3)]; // add clones for the scroll loop
+  
+  const getProjects = () => window.innerWidth <= 768 ? projectsData : projectsWithClones;
   const init = () => {
     
+    
+    distribute(getColumnCount(), getProjects());
+
     // prepare the cards to be pressed
     document.querySelectorAll('[data-projects-card]').forEach((card) => {
       card.addEventListener('click', () => {
@@ -336,68 +413,75 @@ projects.forEach((p, i) => columns[i % NUM_COLUMNS].push(p));
           bubbles: true,
         });
         window.dispatchEvent(event);
-        
+
       });
     });
-    
-    const columns = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-projects-column]'),
-    );
+
+    const columnsContainer = document.querySelector<HTMLElement>('[data-projects-columns]');
+    const columns = document.querySelectorAll<HTMLElement>('[data-projects-column]');
     const section = document.querySelector<HTMLElement>('#projects');
     const title = document.querySelector<HTMLElement>('[data-projects-title]');
-    if (!title || !section || columns.length === 0) return;
+    if (!title || !section ) return;
+
+
+    
+
 
     const timeline = gsap.timeline({ paused: true });
     timeline.to(title, {
       scale: 1,
       opacity: 1,
-      ease: 'power1.inOut',
-      duration: 2,
+      ease: 'power4.out',
+      duration: 1,
     });
     // 2
 
-    columns.forEach((col, i) => {
-      timeline.to(
-        col,
-        {
-          yPercent: -700,
-          duration: 10,
-        },
-        i == 0 ? '>-=1' : '<',
-      );
-    });
-    // 11.5
+    const percentToScroll = (columnsContainer?.scrollHeight||0) / window.innerHeight * 100;
+    console.log(percentToScroll);
+    
+    gsap.set(columnsContainer, { rotateX: 30, yPercent: 10,});
+    gsap.set(columns, { yPercent: 35,});
+    timeline.to(columnsContainer, {
+      rotateX: '4deg',
+      duration: 2
+    },">-=1");
+    timeline.to(section, {
+      "--perspective": '400px',
+      duration: 2
+    },"<");
+    
+    timeline.to(columns, {
+      yPercent: -100,
+      ease: "linear",
+
+      duration: 3,
+    },"<");
     
     
 
-    
-    
-    // inserted
-    timeline.to("[data-projects-columns]", {
-      "--rotation-x-deg": "5deg",
-      ease: 'power4.inOut',
-      duration: 5
-    },.5);
-    
-
-    // The pin/scrub lasts for `+=3000` of scroll, so during that window the
-    // columns are continuously transformed. Promote them to a GPU layer only
-    // while the trigger is active, then release it so the layers don't burn
-    // VRAM after the section is offscreen.
-    const promoteColumns = () => gsap.set(columns, { willChange: 'transform' });
+    // The pin/scrub lasts for `+=5000` of scroll, so during that window
+    // the columns are continuously transformed. Promote them to a GPU
+    // layer only while the trigger is active, then release it so the
+    // layers don't burn VRAM after the section is offscreen.
+    const promoteColumns = () => gsap.set(columns, { willChange: 'transform, opacity' });
     const demoteColumns = () => gsap.set(columns, { willChange: 'auto' });
 
     ScrollTrigger.create({
       trigger: section,
       pin: true,
+      pinSpacing: true,
       start: 'top top',
-      end: '+=5000',
+      end: '+=7000',
       scrub: 0.5,
       animation: timeline,
       onEnter: promoteColumns,
       onEnterBack: promoteColumns,
       onLeave: demoteColumns,
       onLeaveBack: demoteColumns,
+    });
+    
+    window.addEventListener('resize', () => {
+          ScrollTrigger.refresh();
     });
     
   };

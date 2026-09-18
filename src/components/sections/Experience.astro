@@ -48,7 +48,7 @@ const resolved = entries.map((entry) => {
           const empty = t(lang, 'experience.noImages');
           return (
             <article
-              class="experience-card experience__card"
+              class="experience__card"
               data-experience-card
               data-card-id={exp.id}
               id={`experienceCard-${exp.id}`}
@@ -191,10 +191,6 @@ const resolved = entries.map((entry) => {
     </div>
   </div>
 
-  <!-- Spacer that gives the ScrollTrigger enough vertical room to drive
-       the timeline end-to-end. JS keeps its height in sync with the
-       number of cards (one viewport per transition). -->
-  <div id="experienceSpacer" aria-hidden="true"></div>
 </section>
 
 <style>
@@ -244,7 +240,6 @@ const resolved = entries.map((entry) => {
     width: 100%;
     max-width: 1100px;
     height: 70vh;
-    /* min-height: 380px; */
     overflow: visible;
   }
 
@@ -263,13 +258,14 @@ const resolved = entries.map((entry) => {
 
   .experience__card {
     position: absolute;
-    width: clamp(26rem, 70vw, 100%);
+    width: clamp(200px, 50rem, 90vw);
     height: 100%;
     left: 50%;
     top: 50%;
     
     display: grid;
     grid-template-columns: 2fr 3fr;
+    
     gap: 0.85rem;
     padding: 1rem;
     background: linear-gradient(135deg, var(--c-primary) 0%, #0c1f4a 80%);
@@ -281,6 +277,13 @@ const resolved = entries.map((entry) => {
     will-change: transform, opacity;
   }
   
+  @media (aspect-ratio <= 1/1) {
+    .experience__card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center; 
+    }
+  }
   
 
   /* Cards flagged as deferred are not part of the initial timeline and
@@ -294,7 +297,7 @@ const resolved = entries.map((entry) => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 1rem;
     color: var(--c-text);
     overflow: hidden;
     font:  clamp(0.7rem, 5vw, 4rem) var(--ff-geist-pixel);
@@ -303,7 +306,7 @@ const resolved = entries.map((entry) => {
   .experience__card-title {
     margin: 0;
     font-family: var(--ff-pixeloid);
-    font-size: clamp(0.95rem, 3vw, 2rem);
+    font-size: clamp(0.95rem, 5vw, 2rem);
     line-height: 1.15;
   }
 
@@ -325,8 +328,8 @@ const resolved = entries.map((entry) => {
   .experience__card-enterprise:hover { color: var(--c-secondary); }
 
   .experience__card-enterprise-logo {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: min(1.5rem, 4vw);
+    height: min(1.5rem, 4vw);
     
     border-radius: 0.25rem;
     object-fit: cover;
@@ -341,7 +344,7 @@ const resolved = entries.map((entry) => {
 
   .experience__card-description {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: min(0.8rem, 2.4vw);
     line-height: 1.45;
     color: rgba(255, 255, 255, 0.85);
     max-height: 50vh;
@@ -517,15 +520,6 @@ const resolved = entries.map((entry) => {
     background: rgba(171, 171, 171, 0.3);
   }
 
-  /* The spacer exists only to give the ScrollTrigger vertical scroll
-     distance. It carries no visible content. */
-  #experienceSpacer {
-    position: relative;
-    width: 100%;
-    height: 0;
-    pointer-events: none;
-  }
-
   /* ScrollTrigger wraps the pinned element in a fixed-position container.
      Force it to truly cover the viewport so the pin feels seamless. */
   :global(.pin-spacer) > .experience-content {
@@ -540,15 +534,6 @@ const resolved = entries.map((entry) => {
     left: 0;
   }
 
-  @media (max-width: 768px) {
-    .experience__card {
-      flex: 0 0 min(70vw, 20rem);
-      max-width: 20rem;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr;
-    }
-    .experience__viewport { height: 70vh; min-height: 420px; }
-  }
 </style>
 
 <script>
@@ -572,8 +557,8 @@ const resolved = entries.map((entry) => {
    * Build the scroll-driven card stack animation.
    *
    * Logic ported from the reference snippet, adapted to the existing
-   * markup (`.experience-track` / `.experience-card` / `#experienceSpacer`
-   * / `#experienceDetailedView` / `.experience-content`).
+   * markup (`.experience-track` / `.experience-card` /
+   * `#experienceDetailedView` / `.experience-content`).
    *
    * - One viewport of scroll per card transition.
    * - Cards after the first start at `x: 100vw` and slide in.
@@ -586,13 +571,11 @@ const resolved = entries.map((entry) => {
     root: HTMLElement,
   ): ExperienceAnimationHandle | null => {
     const track = root.querySelector<HTMLElement>('.experience-track');
-    const content = root.querySelector<HTMLElement>('.experience-content');
-    const wrapper = root.querySelector<HTMLElement>('#experienceDetailedView');
 
     if (!track || !root) return null;
 
     const cards = Array.from(
-      track.querySelectorAll<HTMLElement>('.experience-card'),
+      track.querySelectorAll<HTMLElement>('.experience__card'),
     ).filter((c) => !c.hasAttribute('data-deferred'));
     const numCards = cards.length;
     if (numCards === 0) return null;
@@ -653,27 +636,33 @@ const resolved = entries.map((entry) => {
 
     const getScrollDistance = () => totalDuration * window.innerHeight;
 
+    // The pin/scrub lasts for the full scroll distance, so during that
+    // window the cards are continuously transformed. Promote them to a
+    // GPU layer only while the trigger is active, then release it so
+    // the layers don't burn VRAM after the section is offscreen.
+    const promoteCards = () => gsap.set(cards, { willChange: 'transform, opacity' });
+    const demoteCards = () => gsap.set(cards, { willChange: 'auto' });
+
     const st = ScrollTrigger.create({
-      scroller: wrapper ?? undefined,
-      trigger: content ?? undefined,
+      trigger: root,
       start: 'top top',
       end: () => `+=${getScrollDistance()}`,
       scrub: 0.4,
-      // Pin keeps the section glued to the viewport while the timeline
-      // plays. pinSpacing:false stops GSAP from injecting its own
-      // placeholder — #experienceSpacer already provides the scroll
-      // distance the page needs.
-      pin: content ?? true,
-      pinSpacing: false,
+      pin: true,
+      pinSpacing: true,
       snap: {
         snapTo: 'labels',
         duration: 0.3,
         ease: 'power1.inOut',
       },
       animation: timeline,
+      onEnter: promoteCards,
+      onEnterBack: promoteCards,
+      onLeave: demoteCards,
+      onLeaveBack: demoteCards,
       // Unlock "see all" once the user has scrolled past every
       // initially visible card. Progress hits 1 at the end of the
-      // spacer's scroll distance (i.e. card-2-end).
+      // scroll distance (i.e. card-N-end).
       onUpdate: (self) => {
         if (self.progress < 1) return;
         const btn = document.querySelector<HTMLElement>(
@@ -683,25 +672,7 @@ const resolved = entries.map((entry) => {
           btn.removeAttribute('disabled');
         }
       },
-      onRefresh: () => {
-        // Spacer height = scroll distance so the page has enough scroll
-        // room to drive the animation end-to-end.
-        const spacer = document.querySelector<HTMLElement>(
-          '#experienceSpacer',
-        );
-        if (spacer) {
-          spacer.style.height = `${getScrollDistance()}px`;
-        }
-      },
     });
-
-    // Initial sizing of the spacer (onRefresh handles subsequent updates).
-    const initialSpacer = document.querySelector<HTMLElement>(
-      '#experienceSpacer',
-    );
-    if (initialSpacer) {
-      initialSpacer.style.height = `${getScrollDistance()}px`;
-    }
 
     return {
       timeline,
@@ -720,7 +691,7 @@ const resolved = entries.map((entry) => {
       .forEach((el) => {
         // Skip swipers inside deferred cards — they are display:none and
         // Swiper would otherwise try to measure a zero-sized container.
-        if (el.closest('.experience-card[data-deferred]')) return;
+        if (el.closest('.experience__card[data-deferred]')) return;
         const cardId = el.getAttribute('data-card-id');
         if (!cardId) return;
         new Swiper(el, {
@@ -762,7 +733,7 @@ const resolved = entries.map((entry) => {
     seeAllBtn?.addEventListener('click', () => {
       if (!root) return;
       const deferred = root.querySelectorAll<HTMLElement>(
-        '.experience-card[data-deferred]',
+        '.experience__card[data-deferred]',
       );
       if (deferred.length === 0) {
         seeAllBtn.style.display = 'none';

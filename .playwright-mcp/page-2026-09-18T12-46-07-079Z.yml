@@ -1,0 +1,167 @@
+- main [ref=e2]:
+  - button "Menú" [ref=e3] [cursor=pointer]:
+    - img "Menú" [ref=e5]
+  - menu "Menú":
+    - list:
+      - link "EN":
+        - /url: /en
+        - listitem:
+          - menuitem "EN":
+            - generic:
+              - img "Idioma"
+            - generic: Idioma
+            - generic: ES
+      - listitem:
+        - menuitem "Mi experiencia Mi experiencia":
+          - generic:
+            - img "Mi experiencia"
+          - generic: Mi experiencia
+      - listitem:
+        - menuitem "Sobre mí Sobre mí":
+          - generic:
+            - img "Sobre mí"
+          - generic: Sobre mí
+      - listitem:
+        - menuitem "Mis proyectos Mis proyectos":
+          - generic:
+            - img "Mis proyectos"
+          - generic: Mis proyectos
+      - listitem:
+        - menuitem "Contacto Contacto":
+          - generic:
+            - img "Contacto"
+          - generic: Contacto
+      - listitem:
+        - menuitem "Volver al inicio":
+          - generic:
+            - img "Inicio"
+          - generic: Inicio
+  - navigation "Page scroll progress"
+  - generic [ref=e7]:
+    - img "Pixel art avatar of Juan Jose Huertas" [ref=e8]
+    - generic [ref=e9]:
+      - heading "Juan Jose Huertas" [level=1] [ref=e10]
+      - paragraph
+  - generic [ref=e12]:
+    - heading "Mis proyectos" [level=2] [ref=e13]
+    - generic [ref=e15]:
+      - article [ref=e16]:
+        - generic [ref=e18]:
+          - heading "Iphone 4s api" [level=3] [ref=e19]
+          - paragraph [ref=e20]: ¿Correr un servidor en un Iphone 4s? Claro que sí!. Este proyecto se enfocó en crear un servidor en un Iphone 4s usando python 2.5.1 y las librerias que vienen por defecto con este python. El servidor es capaz de manejar bases de datos sqlite y guardar archivos de los cuales se les puede cambiar la visibilidad.
+        - text: Ver el proyecto
+      - article [ref=e21]:
+        - generic [ref=e23]:
+          - heading "Disney+ Clone" [level=3] [ref=e24]
+          - paragraph [ref=e25]: Este proyecto se enfocó en hacer una réplica de la página de Disney+ exactamente igual (pixel perfect) utilizando las tecnologías más básicas (HTML y CSS). Se evitó adrede el uso de cualquier tipo de librería u hojas de estilos existentes y se construyó bajo la metodología BEM para dar orden al nombramiento de clases CSS.
+        - text: Ver el proyecto
+      - article [ref=e26]:
+        - generic [ref=e28]:
+          - heading "Chattus" [level=3] [ref=e29]
+          - paragraph [ref=e30]: Esta página web permite crear un chat temporal rápido y sencillo. La web se puede usar sin necesidad de registrarse y con funcionalidades como enviar mensajes, fotos, videos, audios y archivos. También permite crear salas de chat con funcionalidades como mínimo tiempo de actividad o exigencia de foco en el chat. La construcción de la página se hizo con React y Typescript y el backend con Fastapi.
+        - text: Ver el proyecto
+      - article [ref=e31]:
+        - generic [ref=e33]:
+          - heading "NetflixClone Clone" [level=3] [ref=e34]
+          - paragraph [ref=e35]: Este es un clon de la pagina web de Netflix. La app simula el login y registro de usuarios utilizando AWS Cognito o Google, permite el pago de la suscripción utilizando Paypal y almacena la información de los usuarios en Firebase.
+        - text: Ver el proyecto
+      - article [ref=e36]:
+        - generic [ref=e38]:
+          - heading "Memorable3" [level=3] [ref=e39]
+          - paragraph [ref=e40]: Este es Memorable, realizado por 3ra vez. Este proyecto utiliza react.js, fastAPI y postgres SQL. Permite a los usuarios buscar el diseño que buscan, con facilidad, ya que se dispone de filtro por etiquetas, buscador por palabras y mas interesante, sugerencias generadas por IA. Los usuarios pueden registrarse y guardar los diseños que les gusten, para luego verlos en sus favoritos. En cuanto a la administración, se puede gestionar los diseños, los tags y en general, la info de la página.
+        - text: Ver el proyecto
+      - article [ref=e41]:
+        - generic [ref=e43]:
+          - heading "Prematch surebets gettor" [level=3] [ref=e44]
+          - paragraph [ref=e45]: "Este es un bot, que busca surebets en 3 casas de apuestas: wplay, betplay y codere. Analiza los eventos de futbol de cada una de las casas de apuestas y agrupa los mismos eventos, para luego ver si existe una surebet. Si es asi, la envia a todos los que esten suscritos al bot de telegram!"
+        - text: Ver el proyecto
+      - article [ref=e46]:
+        - generic [ref=e48]:
+          - heading "EasySite" [level=3] [ref=e49]
+          - paragraph [ref=e50]: EasySite es una plataforma que permite a las empresas crear, administrar y personalizar páginas web simples. Con un enfoque minimalista pero funcional, provee herramientas intuitivas para la creación de contenido, gestión de citas y contacto con clientes. El administrador global gestiona todas las empresas, mientras que cada empresa dispone de un panel limitado para personalizar su web y administrar su agenda.
+        - text: Ver el proyecto
+      - article [ref=e51]:
+        - generic [ref=e53]:
+          - heading "Instagram follower bot" [level=3] [ref=e54]
+          - paragraph [ref=e55]: Este es un proyecto muy interesante, ya que se trata de un bot que sigue a los seguidores de una cuenta de Instagram. Dadas unas cuentas objetivo, el bot sigue a los seguidores de estas cuentas, con un criterio que se puede configurar. Ya que Instagram tiene ciertas restricciones, el bot, aleatoriamente revisa el feed de instagram y tambien la mira con criterio, ignorando el contenido que no cumpla con el criterio. Los criterios son evaluados mediante IA, para tener un feed personalizado y seguir cuentas idoneas.
+        - text: Ver el proyecto
+      - article [ref=e56]:
+        - generic [ref=e58]:
+          - heading "DevKalk" [level=3] [ref=e59]
+          - paragraph [ref=e60]: DevKalk es una Progressive Web App (PWA) diseñada para desarrolladores freelance. Esta herramienta ayuda a crear presupuestos de proyectos con precisión utilizando sugerencias impulsadas por Inteligencia Artificial para mejorar la exactitud en la estimación. Permite crear, editar y gestionar funcionalidades y tareas del proyecto, con opciones como exportación a PDF, importación/exportación de configuraciones y edición dinámica del proyecto.
+        - text: Ver el proyecto
+      - article [ref=e61]:
+        - generic [ref=e63]:
+          - heading "DevKalk" [level=3] [ref=e64]
+          - paragraph [ref=e65]: DevKalk es una Progressive Web App (PWA) diseñada para desarrolladores freelance. Esta herramienta ayuda a crear presupuestos de proyectos con precisión utilizando sugerencias impulsadas por Inteligencia Artificial para mejorar la exactitud en la estimación. Permite crear, editar y gestionar funcionalidades y tareas del proyecto, con opciones como exportación a PDF, importación/exportación de configuraciones y edición dinámica del proyecto.
+        - text: Ver el proyecto
+      - article [ref=e66]:
+        - generic [ref=e68]:
+          - heading "Instagram follower bot" [level=3] [ref=e69]
+          - paragraph [ref=e70]: Este es un proyecto muy interesante, ya que se trata de un bot que sigue a los seguidores de una cuenta de Instagram. Dadas unas cuentas objetivo, el bot sigue a los seguidores de estas cuentas, con un criterio que se puede configurar. Ya que Instagram tiene ciertas restricciones, el bot, aleatoriamente revisa el feed de instagram y tambien la mira con criterio, ignorando el contenido que no cumpla con el criterio. Los criterios son evaluados mediante IA, para tener un feed personalizado y seguir cuentas idoneas.
+        - text: Ver el proyecto
+      - article [ref=e71]:
+        - generic [ref=e73]:
+          - heading "EasySite" [level=3] [ref=e74]
+          - paragraph [ref=e75]: EasySite es una plataforma que permite a las empresas crear, administrar y personalizar páginas web simples. Con un enfoque minimalista pero funcional, provee herramientas intuitivas para la creación de contenido, gestión de citas y contacto con clientes. El administrador global gestiona todas las empresas, mientras que cada empresa dispone de un panel limitado para personalizar su web y administrar su agenda.
+        - text: Ver el proyecto
+      - article [ref=e76]:
+        - generic [ref=e78]:
+          - heading "Prematch surebets gettor" [level=3] [ref=e79]
+          - paragraph [ref=e80]: "Este es un bot, que busca surebets en 3 casas de apuestas: wplay, betplay y codere. Analiza los eventos de futbol de cada una de las casas de apuestas y agrupa los mismos eventos, para luego ver si existe una surebet. Si es asi, la envia a todos los que esten suscritos al bot de telegram!"
+        - text: Ver el proyecto
+      - article [ref=e81]:
+        - generic [ref=e83]:
+          - heading "Memorable3" [level=3] [ref=e84]
+          - paragraph [ref=e85]: Este es Memorable, realizado por 3ra vez. Este proyecto utiliza react.js, fastAPI y postgres SQL. Permite a los usuarios buscar el diseño que buscan, con facilidad, ya que se dispone de filtro por etiquetas, buscador por palabras y mas interesante, sugerencias generadas por IA. Los usuarios pueden registrarse y guardar los diseños que les gusten, para luego verlos en sus favoritos. En cuanto a la administración, se puede gestionar los diseños, los tags y en general, la info de la página.
+        - text: Ver el proyecto
+      - article [ref=e86]:
+        - generic [ref=e88]:
+          - heading "NetflixClone Clone" [level=3] [ref=e89]
+          - paragraph [ref=e90]: Este es un clon de la pagina web de Netflix. La app simula el login y registro de usuarios utilizando AWS Cognito o Google, permite el pago de la suscripción utilizando Paypal y almacena la información de los usuarios en Firebase.
+        - text: Ver el proyecto
+      - article [ref=e91]:
+        - generic [ref=e93]:
+          - heading "Chattus" [level=3] [ref=e94]
+          - paragraph [ref=e95]: Esta página web permite crear un chat temporal rápido y sencillo. La web se puede usar sin necesidad de registrarse y con funcionalidades como enviar mensajes, fotos, videos, audios y archivos. También permite crear salas de chat con funcionalidades como mínimo tiempo de actividad o exigencia de foco en el chat. La construcción de la página se hizo con React y Typescript y el backend con Fastapi.
+        - text: Ver el proyecto
+      - article [ref=e96]:
+        - generic [ref=e98]:
+          - heading "Disney+ Clone" [level=3] [ref=e99]
+          - paragraph [ref=e100]: Este proyecto se enfocó en hacer una réplica de la página de Disney+ exactamente igual (pixel perfect) utilizando las tecnologías más básicas (HTML y CSS). Se evitó adrede el uso de cualquier tipo de librería u hojas de estilos existentes y se construyó bajo la metodología BEM para dar orden al nombramiento de clases CSS.
+        - text: Ver el proyecto
+      - article [ref=e101]:
+        - generic [ref=e103]:
+          - heading "Iphone 4s api" [level=3] [ref=e104]
+          - paragraph [ref=e105]: ¿Correr un servidor en un Iphone 4s? Claro que sí!. Este proyecto se enfocó en crear un servidor en un Iphone 4s usando python 2.5.1 y las librerias que vienen por defecto con este python. El servidor es capaz de manejar bases de datos sqlite y guardar archivos de los cuales se les puede cambiar la visibilidad.
+        - text: Ver el proyecto
+  - generic [ref=e106]:
+    - generic [ref=e107]:
+      - paragraph [ref=e108]: ¿Te interesa mi trabajo? Escríbeme y charlemos sobre cómo puedo ayudarte a construir tu próximo proyecto.
+      - link "juanjosehuertas.dev@gmail.com" [ref=e109] [cursor=pointer]:
+        - /url: mailto:juanjosehuertas.dev@gmail.com
+      - paragraph [ref=e110]:
+        - generic [ref=e111]: "o al teléfono:"
+        - link "+57 3241066569" [ref=e112] [cursor=pointer]:
+          - /url: https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!
+    - generic [ref=e117]:
+      - link "GitHub" [ref=e118] [cursor=pointer]:
+        - /url: https://github.com/jjhbotache
+      - link "Email" [ref=e121] [cursor=pointer]:
+        - /url: mailto:juanjosehuertas.dev@gmail.com
+      - link "LinkedIn" [ref=e124] [cursor=pointer]:
+        - /url: https://www.linkedin.com/in/juan-jose-huertas-botache
+      - link "Telegram" [ref=e127] [cursor=pointer]:
+        - /url: https://t.me/jjhbotache
+      - link "WhatsApp" [ref=e130] [cursor=pointer]:
+        - /url: https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!
+      - link "GitHub" [ref=e133] [cursor=pointer]:
+        - /url: https://github.com/jjhbotache
+      - link "Email" [ref=e136] [cursor=pointer]:
+        - /url: mailto:juanjosehuertas.dev@gmail.com
+      - link "LinkedIn" [ref=e139] [cursor=pointer]:
+        - /url: https://www.linkedin.com/in/juan-jose-huertas-botache
+      - link "Telegram" [ref=e142] [cursor=pointer]:
+        - /url: https://t.me/jjhbotache
+      - link "WhatsApp" [ref=e145] [cursor=pointer]:
+        - /url: https://wa.me/3241066569?text=Hola%20Juan%20Jose,%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte!

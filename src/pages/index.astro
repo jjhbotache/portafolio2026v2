@@ -9,6 +9,7 @@ import ProjectsPreloads from '../components/ProjectsPreloads.astro';
 import ScrollProgress from '../components/ScrollProgress.astro';
 import { DEFAULT_LANG, type Lang } from '../i18n/utils';
 import ProjectSheet from '../components/sections/ProjectSheet.astro';
+import Menu from '../components/Menu.astro';
 
 // Resolve the landing language from the URL `?lang=xx` query first, then
 // fall back to the Astro cookie (`Astro.preferredLocale` isn't set up here
@@ -25,17 +26,16 @@ const lang: Lang = (queryLang === 'en' || queryLang === 'es')
   <!-- Preload every visible project cover image so the browser starts
        downloading them in parallel with the JS bundle. First image gets
        fetchpriority="high" inside ProjectsPreloads.astro. -->
+       
+  <Menu lang={lang} />
   <ProjectsPreloads slot="head" />
 
   <ScrollProgress />
-
-  <main class="page">
-    <Splash lang={lang} />
-    <Experience lang={lang} />
-    <About lang={lang} />
-    <Projects lang={lang} />
-    <Contact lang={lang} />
-  </main>
+  <Splash lang={lang} />
+  <Experience lang={lang} />
+  <About lang={lang} />
+  <Projects lang={lang} />
+  <Contact lang={lang} />
 </Base>
 
 <style>
@@ -49,13 +49,13 @@ const lang: Lang = (queryLang === 'en' || queryLang === 'es')
      change so the timeline stays in sync. The per-section timelines are
      created inside each component script. -->
 <script>
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-  const refresh = () => {
-    requestAnimationFrame(() => ScrollTrigger.refresh());
-  };
+  // const refresh = () => {
+  //   requestAnimationFrame(() => ScrollTrigger.refresh());
+  // };
 
-  window.addEventListener('load', refresh);
-  window.addEventListener('resize', refresh);
-  window.addEventListener('portafolio:lang', refresh);
+  // window.addEventListener('load', refresh);
+  // window.addEventListener('resize', refresh);
+  // window.addEventListener('portafolio:lang', refresh);
 </script>

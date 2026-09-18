@@ -1,0 +1,411 @@
+- main [ref=e2]:
+  - button "Menú" [ref=e3] [cursor=pointer]:
+    - img "Menú" [ref=e5]
+  - menu "Menú":
+    - list:
+      - link "EN":
+        - /url: /en
+        - listitem:
+          - menuitem "EN":
+            - generic:
+              - img "Idioma"
+            - generic: Idioma
+            - generic: ES
+      - listitem:
+        - menuitem "Mi experiencia Mi experiencia":
+          - generic:
+            - img "Mi experiencia"
+          - generic: Mi experiencia
+      - listitem:
+        - menuitem "Sobre mí Sobre mí":
+          - generic:
+            - img "Sobre mí"
+          - generic: Sobre mí
+      - listitem:
+        - menuitem "Mis proyectos Mis proyectos":
+          - generic:
+            - img "Mis proyectos"
+          - generic: Mis proyectos
+      - listitem:
+        - menuitem "Contacto Contacto":
+          - generic:
+            - img "Contacto"
+          - generic: Contacto
+      - listitem:
+        - menuitem "Volver al inicio":
+          - generic:
+            - img "Inicio"
+          - generic: Inicio
+  - navigation "Page scroll progress"
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - img "Pixel art avatar of Juan Jose Huertas" [ref=e9]
+      - img "JavaScript"
+      - img "React"
+      - img "Python"
+      - img "FastAPI"
+    - generic [ref=e10]:
+      - heading "Juan Jose Huertas" [level=1] [ref=e11]
+      - paragraph
+  - generic [ref=e14]:
+    - heading "Mi experiencia" [level=2] [ref=e15]
+    - generic [ref=e17]:
+      - article [ref=e18]:
+        - generic [ref=e19]:
+          - heading "JURIESCAN API multiservicios" [level=3] [ref=e20]
+          - link "Consultec Consultec" [ref=e22] [cursor=pointer]:
+            - /url: https://consultec.com.co/
+            - img "Consultec" [ref=e23]
+            - generic [ref=e24]: Consultec
+          - paragraph [ref=e25]: ago 2025 — dic 2025
+          - paragraph [ref=e26]: Diseño y desarrollo de la API multiservicios de Juriescan, con funcionalidades para acceder a información sobre procesos judiciales y checkeo en redes sociales con uso de la API de OpenAI.
+          - button "Ver más..." [ref=e27] [cursor=pointer]
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - img "JURIESCAN API multiservicios" [ref=e32]
+            - img "JURIESCAN API multiservicios" [ref=e34]
+          - generic [ref=e35]:
+            - generic [ref=e36] [cursor=pointer]
+            - generic [ref=e37] [cursor=pointer]
+          - generic [ref=e38] [cursor=pointer]: prev
+          - generic [ref=e39] [cursor=pointer]: next
+        - generic:
+          - button "Cerrar detalle": ×
+          - generic:
+            - generic:
+              - generic: FastAPI
+              - generic: OpenAI API
+              - generic: Playwright
+              - generic: Supabase
+              - generic: Docker
+              - generic: Python
+              - generic: PostgreSQL
+              - generic: SQLAlchemy
+            - generic:
+              - paragraph:
+                - strong: Diseñe
+                - text: "y"
+                - strong: desarrollé
+                - text: "la API multiservicios de Juriescan, una plataforma que permite acceder a información sobre procesos judiciales en Colombia:"
+              - list:
+                - listitem: Antecedentes policiales
+                - listitem: RUNT
+                - listitem: Procuraduría
+                - listitem: Contraloría
+              - paragraph: La API tambien permite realizar un checkeo en redes sociales y generar un resumen de la información obtenida utilizando la API de OpenAI.
+              - paragraph:
+                - text: La API fue desarrollada utilizando
+                - strong: FastAPI
+                - text: ","
+                - strong: Python
+                - text: "y"
+                - strong: Playwright
+                - text: ", con una base de datos"
+                - strong: PostgreSQL
+                - text: gestionada con
+                - strong: SQLAlchemy
+                - text: y desplegada en
+                - strong: Supabase
+                - text: .
+      - article [ref=e40]:
+        - generic [ref=e41]:
+          - heading "Profesor en Algonova latinoamérica" [level=3] [ref=e42]
+          - link "Algonova Algonova" [ref=e44] [cursor=pointer]:
+            - /url: https://algonova.lat/
+            - img "Algonova" [ref=e45]
+            - generic [ref=e46]: Algonova
+          - paragraph [ref=e47]: oct 2025 — Actualidad
+          - paragraph [ref=e48]: Enseñanza de python y scratch a estudiantes de secundaria y preparatoria en Algonova latinoamérica, una plataforma educativa, enfocándose en conceptos de programación, resolución de problemas y desarrollo de proyectos prácticos.
+          - button "Ver más..." [ref=e49] [cursor=pointer]
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - img "Profesor en Algonova latinoamérica" [ref=e54]
+            - img "Profesor en Algonova latinoamérica" [ref=e56]
+          - generic [ref=e57]:
+            - generic [ref=e58] [cursor=pointer]
+            - generic [ref=e59] [cursor=pointer]
+          - generic [ref=e60] [cursor=pointer]: prev
+          - generic [ref=e61] [cursor=pointer]: next
+        - generic:
+          - button "Cerrar detalle": ×
+          - generic:
+            - generic:
+              - generic: Python
+              - generic: Scratch
+            - generic:
+              - paragraph:
+                - strong: Enseño
+                - text: python y scratch a estudiantes de secundaria y preparatoria en Algonova latinoamérica, una plataforma educativa. Los cursos se enfocan en la enseñanza de conceptos de programación, resolución de problemas y desarrollo de proyectos prácticos.
+      - article [ref=e62]:
+        - generic [ref=e63]:
+          - heading "Diseño a la medida de Ginia" [level=3] [ref=e64]
+          - generic [ref=e65]:
+            - link "Remedia Remedia" [ref=e66] [cursor=pointer]:
+              - /url: https://www.remedia.mx/
+              - img "Remedia" [ref=e67]
+              - generic [ref=e68]: Remedia
+            - link "Ginia Ginia" [ref=e69] [cursor=pointer]:
+              - /url: https://www.ginia.io/
+              - img "Ginia" [ref=e70]
+              - generic [ref=e71]: Ginia
+          - paragraph [ref=e72]: oct 2025 — oct 2025
+          - paragraph [ref=e73]: Desarrollo de landing page para Ginia dado un diseño detallado con animaciones y optimización para dispositivos móviles y tabletas.
+          - button "Ver más..." [ref=e74] [cursor=pointer]
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - img "Diseño a la medida de Ginia" [ref=e79]
+            - img "Diseño a la medida de Ginia" [ref=e81]
+            - img "Diseño a la medida de Ginia" [ref=e83]
+            - img "Diseño a la medida de Ginia" [ref=e85]
+          - generic [ref=e86]:
+            - generic [ref=e87] [cursor=pointer]
+            - generic [ref=e88] [cursor=pointer]
+            - generic [ref=e89] [cursor=pointer]
+            - generic [ref=e90] [cursor=pointer]
+          - generic [ref=e91] [cursor=pointer]: prev
+          - generic [ref=e92] [cursor=pointer]: next
+        - generic:
+          - button "Cerrar detalle": ×
+          - generic:
+            - generic:
+              - generic: React
+              - generic: Motion
+              - generic: CSS
+            - generic:
+              - paragraph:
+                - strong: Desarrollé
+                - text: la landing page de
+                - link "Ginia":
+                  - /url: https://www.ginia.io/
+                - text: junto a
+                - link "Remedia":
+                  - /url: https://www.remedia.mx/
+                - text: ", quien proporcionó el diseño detallado con animaciones y demás elementos, utilizando"
+                - strong: React
+                - text: "y"
+                - strong: Motion
+                - text: para lograr animaciones fluidas y una experiencia de usuario atractiva. La página está optimizada para dispositivos móviles y tabletas, asegurando una navegación intuitiva en todas las plataformas.
+      - text: prev next prev next prev next
+    - button "Ver todas las experiencias" [disabled] [ref=e94]
+  - generic [ref=e96]:
+    - generic [ref=e97]:
+      - generic [ref=e100]:
+        - link "JavaScript" [ref=e101] [cursor=pointer]:
+          - /url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+          - img "JavaScript" [ref=e102]
+        - link "React" [ref=e104] [cursor=pointer]:
+          - /url: https://react.dev
+          - img "React" [ref=e105]
+        - link "Astro" [ref=e107] [cursor=pointer]:
+          - /url: https://astro.build
+          - img "Astro" [ref=e108]
+        - link "React Native" [ref=e110] [cursor=pointer]:
+          - /url: https://reactnative.dev
+          - img "React Native" [ref=e111]
+        - link "Redux Toolkit" [ref=e113] [cursor=pointer]:
+          - /url: https://redux.js.org
+          - img "Redux Toolkit" [ref=e114]
+        - link "Styled Components" [ref=e116] [cursor=pointer]:
+          - /url: https://styled-components.com
+          - img "Styled Components" [ref=e117]
+        - link "React Router" [ref=e119] [cursor=pointer]:
+          - /url: https://reactrouter.com
+          - img "React Router" [ref=e120]
+        - link "Framer Motion" [ref=e122] [cursor=pointer]:
+          - /url: https://www.framer.com/motion
+          - img "Framer Motion" [ref=e123]
+        - link "Bootstrap" [ref=e125] [cursor=pointer]:
+          - /url: https://getbootstrap.com
+          - img "Bootstrap" [ref=e126]
+        - link "Expo" [ref=e128] [cursor=pointer]:
+          - /url: https://expo.io
+          - img "Expo" [ref=e129]
+        - link "Recharts" [ref=e131] [cursor=pointer]:
+          - /url: https://recharts.org
+          - img "Recharts" [ref=e132]
+        - link "Vite" [ref=e134] [cursor=pointer]:
+          - /url: https://vitejs.dev
+          - img "Vite" [ref=e135]
+        - link "TypeScript" [ref=e137] [cursor=pointer]:
+          - /url: https://www.typescriptlang.org
+          - img "TypeScript" [ref=e138]
+        - link "Three.js" [ref=e140] [cursor=pointer]:
+          - /url: https://threejs.org
+          - img "Three.js" [ref=e141]
+        - link "React Native Elements" [ref=e143] [cursor=pointer]:
+          - /url: https://reactnativeelements.com
+          - img "React Native Elements" [ref=e144]
+        - link "Tailwind CSS" [ref=e146] [cursor=pointer]:
+          - /url: https://tailwindcss.com
+          - img "Tailwind CSS" [ref=e147]
+        - link "JavaScript" [ref=e149] [cursor=pointer]:
+          - /url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+          - img "JavaScript" [ref=e150]
+        - link "React" [ref=e152] [cursor=pointer]:
+          - /url: https://react.dev
+          - img "React" [ref=e153]
+        - link "Astro" [ref=e155] [cursor=pointer]:
+          - /url: https://astro.build
+          - img "Astro" [ref=e156]
+        - link "React Native" [ref=e158] [cursor=pointer]:
+          - /url: https://reactnative.dev
+          - img "React Native" [ref=e159]
+        - link "Redux Toolkit" [ref=e161] [cursor=pointer]:
+          - /url: https://redux.js.org
+          - img "Redux Toolkit" [ref=e162]
+        - link "Styled Components" [ref=e164] [cursor=pointer]:
+          - /url: https://styled-components.com
+          - img "Styled Components" [ref=e165]
+        - link "React Router" [ref=e167] [cursor=pointer]:
+          - /url: https://reactrouter.com
+          - img "React Router" [ref=e168]
+        - link "Framer Motion" [ref=e170] [cursor=pointer]:
+          - /url: https://www.framer.com/motion
+          - img "Framer Motion" [ref=e171]
+        - link "Bootstrap" [ref=e173] [cursor=pointer]:
+          - /url: https://getbootstrap.com
+          - img "Bootstrap" [ref=e174]
+        - link "Expo" [ref=e176] [cursor=pointer]:
+          - /url: https://expo.io
+          - img "Expo" [ref=e177]
+        - link "Recharts" [ref=e179] [cursor=pointer]:
+          - /url: https://recharts.org
+          - img "Recharts" [ref=e180]
+        - link "Vite" [ref=e182] [cursor=pointer]:
+          - /url: https://vitejs.dev
+          - img "Vite" [ref=e183]
+        - link "TypeScript" [ref=e185] [cursor=pointer]:
+          - /url: https://www.typescriptlang.org
+          - img "TypeScript" [ref=e186]
+        - link "Three.js" [ref=e188] [cursor=pointer]:
+          - /url: https://threejs.org
+          - img "Three.js" [ref=e189]
+        - link "React Native Elements" [ref=e191] [cursor=pointer]:
+          - /url: https://reactnativeelements.com
+          - img "React Native Elements" [ref=e192]
+        - link "Tailwind CSS" [ref=e194] [cursor=pointer]:
+          - /url: https://tailwindcss.com
+          - img "Tailwind CSS" [ref=e195]
+      - generic [ref=e199]:
+        - link "Firebase" [ref=e200] [cursor=pointer]:
+          - /url: https://firebase.google.com
+          - img "Firebase" [ref=e201]
+        - link "Python" [ref=e203] [cursor=pointer]:
+          - /url: https://www.python.org
+          - img "Python" [ref=e204]
+        - link "Flask" [ref=e206] [cursor=pointer]:
+          - /url: https://flask.palletsprojects.com
+          - img "Flask" [ref=e207]
+        - link "FastAPI" [ref=e209] [cursor=pointer]:
+          - /url: https://fastapi.tiangolo.com
+          - img "FastAPI" [ref=e210]
+        - link "phpMyAdmin" [ref=e212] [cursor=pointer]:
+          - /url: https://www.phpmyadmin.net
+          - img "phpMyAdmin" [ref=e213]
+        - link "SQLite" [ref=e215] [cursor=pointer]:
+          - /url: https://www.sqlite.org
+          - img "SQLite" [ref=e216]
+        - link "AWS Cognito" [ref=e218] [cursor=pointer]:
+          - /url: https://aws.amazon.com/cognito
+          - img "AWS Cognito" [ref=e219]
+        - link "Beautiful Soup" [ref=e221] [cursor=pointer]:
+          - /url: https://www.crummy.com/software/BeautifulSoup
+          - img "Beautiful Soup" [ref=e222]
+        - link "PyWebView" [ref=e224] [cursor=pointer]:
+          - /url: https://pywebview.flowrl.com
+          - img "PyWebView" [ref=e225]
+        - link "Selenium" [ref=e227] [cursor=pointer]:
+          - /url: https://selenium-python.readthedocs.io
+          - img "Selenium" [ref=e228]
+        - link "PostgreSQL" [ref=e230] [cursor=pointer]:
+          - /url: https://www.postgresql.org
+          - img "PostgreSQL" [ref=e231]
+        - link "Firebase" [ref=e233] [cursor=pointer]:
+          - /url: https://firebase.google.com
+          - img "Firebase" [ref=e234]
+        - link "Python" [ref=e236] [cursor=pointer]:
+          - /url: https://www.python.org
+          - img "Python" [ref=e237]
+        - link "Flask" [ref=e239] [cursor=pointer]:
+          - /url: https://flask.palletsprojects.com
+          - img "Flask" [ref=e240]
+        - link "FastAPI" [ref=e242] [cursor=pointer]:
+          - /url: https://fastapi.tiangolo.com
+          - img "FastAPI" [ref=e243]
+        - link "phpMyAdmin" [ref=e245] [cursor=pointer]:
+          - /url: https://www.phpmyadmin.net
+          - img "phpMyAdmin" [ref=e246]
+        - link "SQLite" [ref=e248] [cursor=pointer]:
+          - /url: https://www.sqlite.org
+          - img "SQLite" [ref=e249]
+        - link "AWS Cognito" [ref=e251] [cursor=pointer]:
+          - /url: https://aws.amazon.com/cognito
+          - img "AWS Cognito" [ref=e252]
+        - link "Beautiful Soup" [ref=e254] [cursor=pointer]:
+          - /url: https://www.crummy.com/software/BeautifulSoup
+          - img "Beautiful Soup" [ref=e255]
+        - link "PyWebView" [ref=e257] [cursor=pointer]:
+          - /url: https://pywebview.flowrl.com
+          - img "PyWebView" [ref=e258]
+        - link "Selenium" [ref=e260] [cursor=pointer]:
+          - /url: https://selenium-python.readthedocs.io
+          - img "Selenium" [ref=e261]
+        - link "PostgreSQL" [ref=e263] [cursor=pointer]:
+          - /url: https://www.postgresql.org
+          - img "PostgreSQL" [ref=e264]
+      - generic [ref=e268]:
+        - link "Django" [ref=e269] [cursor=pointer]:
+          - /url: https://www.djangoproject.com
+          - img "Django" [ref=e270]
+        - link "Git" [ref=e272] [cursor=pointer]:
+          - /url: https://git-scm.com
+          - img "Git" [ref=e273]
+        - link "GitHub" [ref=e275] [cursor=pointer]:
+          - /url: https://github.com
+          - img "GitHub" [ref=e276]
+        - link "GCP" [ref=e278] [cursor=pointer]:
+          - /url: https://cloud.google.com
+          - img "GCP" [ref=e279]
+        - link "JWT" [ref=e281] [cursor=pointer]:
+          - /url: https://jwt.io
+          - img "JWT" [ref=e282]
+        - link "PayPal" [ref=e284] [cursor=pointer]:
+          - /url: https://www.paypal.com
+          - img "PayPal" [ref=e285]
+        - link "Cloudinary" [ref=e287] [cursor=pointer]:
+          - /url: https://cloudinary.com
+          - img "Cloudinary" [ref=e288]
+        - link "Copilot" [ref=e290] [cursor=pointer]:
+          - /url: https://github.com/features/copilot
+          - img "Copilot" [ref=e291]
+        - link "Google Gemini" [ref=e293] [cursor=pointer]:
+          - /url: https://ai.google.dev/gemini-api
+          - img "Google Gemini" [ref=e294]
+        - link "Django" [ref=e296] [cursor=pointer]:
+          - /url: https://www.djangoproject.com
+          - img "Django" [ref=e297]
+        - link "Git" [ref=e299] [cursor=pointer]:
+          - /url: https://git-scm.com
+          - img "Git" [ref=e300]
+        - link "GitHub" [ref=e302] [cursor=pointer]:
+          - /url: https://github.com
+          - img "GitHub" [ref=e303]
+        - link "GCP" [ref=e305] [cursor=pointer]:
+          - /url: https://cloud.google.com
+          - img "GCP" [ref=e306]
+        - link "JWT" [ref=e308] [cursor=pointer]:
+          - /url: https://jwt.io
+          - img "JWT" [ref=e309]
+        - link "PayPal" [ref=e311] [cursor=pointer]:
+          - /url: https://www.paypal.com
+          - img "PayPal" [ref=e312]
+        - link "Cloudinary" [ref=e314] [cursor=pointer]:
+          - /url: https://cloudinary.com
+          - img "Cloudinary" [ref=e315]
+        - link "Copilot" [ref=e317] [cursor=pointer]:
+          - /url: https://github.com/features/copilot
+          - img "Copilot" [ref=e318]
+        - link "Google Gemini" [ref=e320] [cursor=pointer]:
+          - /url: https://ai.google.dev/gemini-api
+          - img "Google Gemini" [ref=e321]
+    - paragraph [ref=e323]

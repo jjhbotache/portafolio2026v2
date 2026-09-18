@@ -78,8 +78,6 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
      when GSAP tweens them on mousemove. Without @property the values are
      treated as opaque strings and the radial gradient snaps between
      frames instead of gliding toward the cursor. */
-  @property --glow-x { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
-  @property --glow-y { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
 
   .contact {
     position: relative;
@@ -95,13 +93,7 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
 
     radial-gradient(at 89% 93%, hsla(260,45%,18%,1) 0px, transparent 50%),
     radial-gradient(at 7% 33%, hsla(244,56%,8%,1) 0px, transparent 50%),
-    radial-gradient(at 0% 0%, hsla(260,40%,27%,1) 0px, transparent 50%),
-    /* Mouse-following highlight. The origin is driven by --glow-x/--glow-y
-       which the script updates on mousemove. Kept on top of the static
-       layers so the highlight stays the focal point. */
-    /* radial-gradient(at var(--glow-x) var(--glow-y), hsla(280, 95%, 60%, 0.144) 0px, transparent 38%); */
-    /* make it but as an ellipse */
-    radial-gradient(ellipse at var(--glow-x) var(--glow-y), rgba(12, 9, 82, 1) 0px, hsla(256, 82%, 11%, 0.25) 15%, transparent 70%);
+    radial-gradient(at 0% 0%, hsla(260,40%,27%,1) 0px, transparent 50%);
 
     --mask-percentage-x:5%;
     --mask-percentage-y:15%;
@@ -122,31 +114,35 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
     z-index: 2;
     text-align: left;
     max-width: 60rem;
-    padding: 3rem 2rem;
+    padding: 2rem;
     margin: 0  0 5vw 5vw;
+  }
+  
+  @media (max-width: 768px) {
+    .contact__content { margin: 0 ; padding: 1rem; }
   }
 
   .contact__body {
     margin: 0 0 2rem;
     color: var(--c-text-muted);
     font-family: var(--ff-pixeloid);
-    font-size: 1.05rem;
     line-height: 1.5;
     max-width: clamp(20rem, 40vw, 40rem);
   }
 
   .contact__email {
-    display: inline-block;
+    display: inline-flex;
+    flex-wrap: wrap;
     font-family: var(--ff-pixeloid);
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    font-size: clamp(1.4rem, 3vw, 2.5rem);
+    font-size: clamp(1.1rem, 3vw, 2.5rem);
     color: var(--c-text);
     text-decoration: none;
     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
     padding-bottom: 0.3rem;
     transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
-    word-break: break-all;
+    word-break: break-word;
   }
   .contact__email:hover {
     color: var(--c-primary-deep);
@@ -191,7 +187,7 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
     transform: rotate(-28deg) translate(20%,25%);
     
     
-    width: 100%;
+    width: 150%;
     max-width: var(--shell-max);
     overflow: hidden;
     
@@ -200,7 +196,7 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
             mask-image: linear-gradient(to right, transparent 0%, black calc(var(--mask-percentage)), black calc(100% - var(--mask-percentage)), transparent 100%); */
   }
 
-  .contact__marquee-mask { width: 100%; overflow: hidden; }
+  .contact__marquee-mask { width: 150%; overflow: hidden; }
 
   .contact__marquee-track {
     display: flex;
@@ -240,8 +236,8 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
   } */
 
   .contact__marquee-icon{
-    width: 12rem;
-    height: 12rem;
+    width: min(12rem, 24vw);
+    height: min(12rem, 24vw);
     flex-shrink: 0;
     color: var(--c-text-muted);
     transition: color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
@@ -251,10 +247,8 @@ const [emailUser, emailDomain] = CONTACT_EMAIL.split('@');
     color: var(--c-text);
    }
 
-  @media (max-width: 768px) {
-    .contact__marquee-wrap { transform: rotate(-3deg) translateY(1rem); }
-    .contact__marquee-icon { width: 2.5rem; height: 2.5rem; }
-    .contact__content { padding: 2rem 1rem; }
+  @media (max-width: 1024px) {
+    .contact__marquee-wrap { transform: rotate(-25deg) translate(20vw,-2vh); }
   }
 </style>
 

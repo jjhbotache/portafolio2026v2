@@ -4,7 +4,11 @@
 [✅] Add funtionality to experiences cards (view more)
 [✅] experiences cards show all their info
 [✅] Add funtionality to projects cards (view more)
-[ ] Add mobile support
+[ ] Add mobile support:
+  [✅] splash
+  [✅] experiences
+  [ ] projects
+  [ ] contact
 [ ] Check bilingual texts and supports
 bugs:
-  [ ] Fix the reverse section scroll menu
+  [ ] Fix the reverse section scroll menu (contact to projects)
