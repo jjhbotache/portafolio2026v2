@@ -72,7 +72,7 @@ const parsedProjects = projects.map((proj) => {
   @property --grad4-x { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
   @property --grad4-y { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
     
-  @property --perspective { syntax: '<length>'; inherits: true; initial-value: 200px; }
+  @property --perspective { syntax: '<length>'; inherits: true; initial-value: 5px; }
 
   .projects {
     position: relative;
@@ -139,8 +139,9 @@ const parsedProjects = projects.map((proj) => {
 
   .projects__columns  {
     position: absolute;
-    left: 0;
-    bottom: 0;
+    /* bg for debug */
+    /* background: linear-gradient(to bottom, red 0%,red 48%, green 49%, green 51%,red 52%, red 100%);  */
+    inset: 0;
     width: 100%;
     height: 100%;
     display: flex;
@@ -149,6 +150,7 @@ const parsedProjects = projects.map((proj) => {
     margin: 0 auto;
 
     align-items: flex-start;
+    transform-origin: center bottom;
     /* transform: rotateX(30deg) translate(0,50%);    se establece con gsap */
   }
 </style>
@@ -433,27 +435,26 @@ const parsedProjects = projects.map((proj) => {
       opacity: 1,
       ease: 'power4.out',
       duration: 1,
-    });
+    },0);
     // 2
 
-    const percentToScroll = (columnsContainer?.scrollHeight||0) / window.innerHeight * 100;
-    console.log(percentToScroll);
-    
-    gsap.set(columnsContainer, { rotateX: 30, yPercent: 10,});
-    gsap.set(columns, { yPercent: 35,});
+    gsap.set(columnsContainer, { rotateX: '30deg',scale: 5 });
+    gsap.set(columns, { y: columnsContainer?.offsetHeight });
     timeline.to(columnsContainer, {
-      rotateX: '4deg',
-      duration: 2
+      rotateX: '5deg',
+      duration: 1
     },">-=1");
+    timeline.to(columnsContainer, {
+      scale: 1,
+      duration: .5
+    },"<");
     timeline.to(section, {
       "--perspective": '400px',
       duration: 2
     },"<");
-    
     timeline.to(columns, {
-      yPercent: -100,
+      yPercent: -120,
       ease: "linear",
-
       duration: 3,
     },"<");
     

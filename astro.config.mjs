@@ -110,5 +110,15 @@ export default defineConfig({
       },
     ],
   },
+  i18n: {
+    // English is the default locale and is served from the site root
+    // (no prefix in the URL) thanks to `prefixDefaultLocale: false`.
+    // Spanish is served from `/es/`.
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   integrations: [icon()]
 });

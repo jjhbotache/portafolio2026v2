@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { getRelativeLocaleUrl } from 'astro:i18n';
 import { t, type Lang } from '../i18n/utils';
 
 interface Props {
@@ -11,6 +12,18 @@ interface Props {
 const { lang, title, description } = Astro.props as Props;
 const pageTitle = title ?? t(lang, 'site.title');
 const pageDescription = description ?? t(lang, 'site.description');
+
+// Build alternate-language URLs for SEO hreflang. The current path is
+// either `/es/...` (Spanish) or `/...` (English — the default locale
+// has no prefix thanks to `prefixDefaultLocale: false`). We strip the
+// leading `/es` to get the canonical path that lives under the default
+// locale, then ask Astro for the localized URL in both locales.
+const currentPath = Astro.url.pathname;
+const basePath = currentPath.replace(/^\/es(?=\/|$)/, '') || '/';
+const pathForLocaleUrl = basePath.replace(/^\//, '');
+
+const enHref = getRelativeLocaleUrl('en', pathForLocaleUrl);
+const esHref = getRelativeLocaleUrl('es', pathForLocaleUrl);
 ---
 <!doctype html>
 <html lang={lang} data-lang={lang}>
@@ -23,6 +36,11 @@ const pageDescription = description ?? t(lang, 'site.description');
     <link rel="preload" as="image" href="/me.png" />
     <link rel="preload" as="font" type="font/ttf" href="/fonts/PixeloidSans.ttf" crossorigin />
     <!-- <link rel="preload" as="font" type="font/ttf" href="/fonts/Tr2n.ttf" crossorigin /> -->
+
+    <!-- hreflang: tell crawlers which URL serves each language. -->
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="es" href={esHref} />
+    <link rel="alternate" hreflang="x-default" href={enHref} />
 
     <!-- Optional head slot: pages can inject extra <link>, <meta>, etc. here
          (e.g. per-page image preloads). Renders nothing if unused. -->

@@ -29,6 +29,12 @@ const duplicatedRows = technologyCategories.map((category) => ({
                 <span class="about__marquee-name">{tech.name}</span>
               </a>
             ))}
+            {row.duplicated.map((tech) => (
+              <a href={tech.technologyLink} target="_blank" rel="noopener noreferrer" class="about__marquee-item" aria-label={tech.name} title={tech.name}>
+                <img src={tech.svgUrl} alt={tech.name} class="about__marquee-icon" loading="lazy" decoding="async" />
+                <span class="about__marquee-name">{tech.name}</span>
+              </a>
+            ))}
           </div>
         </div>
       </div>
@@ -142,8 +148,8 @@ const duplicatedRows = technologyCategories.map((category) => ({
   }
 
   .about__marquee-icon {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2rem;
+    height: 2rem;
     flex-shrink: 0;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   }
@@ -208,8 +214,8 @@ const duplicatedRows = technologyCategories.map((category) => ({
   }
   
   .about__floater {
-    width: 10vw;
-    height: 10vw;
+    width: max(10vw, 4em);
+    height: max(10vw, 4em);
     object-fit: contain;
     filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 1));
     animation: levitate 3.4s ease-in-out infinite;
@@ -228,7 +234,6 @@ const duplicatedRows = technologyCategories.map((category) => ({
 
   @media (max-width: 768px) {
     .about { gap: 2.5rem; padding: 4rem var(--shell-pad-x); }
-    .about__floater { width: 2.5rem; height: 2.5rem; }
     .about__floaters { gap: 1rem; }
   }
 </style>
@@ -356,9 +361,8 @@ const duplicatedRows = technologyCategories.map((category) => ({
     ScrollTrigger.create({
       trigger: intro,
       pin: true,
-      pinSpacing: true,
       start: 'top top',
-      end: '+=2000',
+      end: '+=4000',
       scrub: 0.5,
       animation: tl,
       snap: {

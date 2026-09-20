@@ -301,6 +301,11 @@
       // Cover the slow path where fonts/images load after the first
       // refresh and shift heights before any resize event has fired.
       window.addEventListener('load', scheduleRebuild);
+      
+      // on resize, the viewport height changes and pinned sections may
+      // have a different scroll range. We don't need to rebuild the
+      // segments themselves, just re-measure their start/end positions.
+      window.addEventListener('resize', scheduleRebuild);
     };
 
     if (document.readyState === 'loading') {

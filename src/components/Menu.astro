@@ -1,6 +1,7 @@
 ---
 import MorphIcon from "morphicons/astro";
-import { Code, Globe, House, Menu as MenuIcon, MessageCircle, Rocket, User, X } from "lucide";
+import { Code, Globe, House, Menu as MenuIcon, MessageCircle, Rocket, User } from "lucide";
+import { getRelativeLocaleUrl } from 'astro:i18n';
 import { t, type Lang } from '../i18n/utils';
 
 interface Props {
@@ -44,6 +45,14 @@ const langShort = t(lang, 'nav.lang.shortLabel');
 const toggleLabel = t(lang, 'nav.menu.toggle');
 const homeLabel = t(lang, 'nav.menu.home');
 const homeAria = t(lang, 'nav.menu.homeAria');
+
+// Compute the URL of the site in the OTHER locale so the lang toggle
+// navigates between `/` and `/es/` (or vice versa) without any
+// redirect or query string. `getRelativeLocaleUrl` understands the
+// project's `i18n` config and respects `prefixDefaultLocale: false`,
+// which means the default locale (`en`) has no URL prefix.
+const otherLocale = lang === 'en' ? 'es' : 'en';
+const langHref = getRelativeLocaleUrl(otherLocale);
 ---
 
 <!-- Floating trigger: morphs its icon between Menu and X. The popup
@@ -61,10 +70,10 @@ const homeAria = t(lang, 'nav.menu.homeAria');
 </button>
 
 <!-- Popup: a panel anchored top-right, listing the language toggle
-     first (reusing the `data-lang-flip` mechanism from Base.astro so
-     the existing flip handler keeps working untouched) and then the
-     four page sections plus a "back to home" button. Each item carries
-     its own morph-icon so the intro / hover animation can drive them. -->
+     first (links straight to the same page in the other locale) and
+     then the four page sections plus a "back to home" button. Each
+     item carries its own morph-icon so the intro / hover animation
+     can drive them. -->
 <div
   id="menu-popup"
   role="menu"
@@ -72,14 +81,12 @@ const homeAria = t(lang, 'nav.menu.homeAria');
   class="menu-popup"
 >
   <ul class="menu-popup__list">
-    <a href={lang==='es' ? '/en' : '/'}  class="menu-item-link">
+    <a href={langHref} class="menu-item-link">
       <li>
         <button
           id="menu-item-lang"
           type="button"
           role="menuitem"
-          data-lang-flip
-          data-action="toggle-lang"
           aria-label={t(lang, 'lang.switchTo')}
           class="menu-item"
         >
@@ -221,19 +228,31 @@ const homeAria = t(lang, 'nav.menu.homeAria');
   // user asked for ("cada sección debe scrollear hasta el inicio").
   const scrollToSection = (sectionId: string) => {
     const target = document.getElementById(sectionId);
+    let offset = 0;
     if (!target) return;
     let addedOffset = 0;
     if (sectionId === 'experienceDetailedView') {
-      addedOffset = 310;
     } else if (sectionId === 'about') {
-      addedOffset = 700;
+      offset = 500; // scroll a bit higher to show the section title
     } else if (sectionId === 'projects') {
-      addedOffset = 7000;
+      offset = 400; // scroll a bit higher to show the section title
     } else if (sectionId === 'contact') {
     }
     
     const top = target.getBoundingClientRect().top + window.scrollY + addedOffset;
     window.scrollTo({ top, behavior: 'smooth' });
+    
+    // now, get the .pin-spacer parent to scroll it to the start
+    const pinSpacer = target.closest('.pin-spacer');
+    if (pinSpacer) {
+      const pinTop = pinSpacer.getBoundingClientRect().top + window.scrollY + addedOffset;
+      window.scrollTo({ top: pinTop, behavior: 'smooth' });
+    }
+    
+    if (offset !== 0) {
+      const offsetTop = top + offset;
+      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+    }
   };
 
   // Section buttons: scroll to the matching section and close the menu.
@@ -249,7 +268,8 @@ const homeAria = t(lang, 'nav.menu.homeAria');
       // transition so the user sees the menu fold away before the
       // page starts moving. 50ms is below the close transition (200ms)
       // but well above a frame, so it feels snappy.
-      window.setTimeout(() => scrollToSection(sectionId), 60);
+      scrollToSection(sectionId)
+      console.log(`Menu: scroll to section ${sectionId}`)
     });
   });
 
@@ -313,8 +333,10 @@ const homeAria = t(lang, 'nav.menu.homeAria');
     right: 1.25rem;
     z-index: 95;
     margin-top: 4rem;
-    min-width: 180px;
-    width: min(28vw, 320px);
+    /* min-width: 180px;
+    width: min(28vw, 320px); */
+    max-width: 320px;
+    min-width: 250px;
     border-radius: 1rem;
     background: rgba(8, 12, 24, 0.78);
     backdrop-filter: blur(16px);

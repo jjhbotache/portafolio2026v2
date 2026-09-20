@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import Splash from '../components/sections/Splash.astro';
+import Experience from '../components/sections/Experience.astro';
+import About from '../components/sections/About.astro';
+import Projects from '../components/sections/Projects.astro';
+import Contact from '../components/sections/Contact.astro';
+import ProjectsPreloads from '../components/ProjectsPreloads.astro';
+import ScrollProgress from '../components/ScrollProgress.astro';
+import Menu from '../components/Menu.astro';
+import type { Lang } from '../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props as Props;
+---
+<Base lang={lang}>
+  <Menu lang={lang} />
+  <ProjectsPreloads slot="head" />
+
+  <ScrollProgress />
+  <Splash lang={lang} />
+  <Experience lang={lang} />
+  <About lang={lang} />
+  <Projects lang={lang} />
+  <Contact lang={lang} />
+</Base>
+
+<style>
+  .page {
+    position: relative;
+    width: 100%;
+  }
+</style>

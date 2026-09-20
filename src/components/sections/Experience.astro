@@ -258,8 +258,9 @@ const resolved = entries.map((entry) => {
 
   .experience__card {
     position: absolute;
-    width: clamp(200px, 50rem, 90vw);
+    width: clamp(20rem, 70vw, 90vw);
     height: 100%;
+    max-height: 65vh;
     left: 50%;
     top: 50%;
     
@@ -567,16 +568,15 @@ const resolved = entries.map((entry) => {
    * - The timeline is scrubbed and snapped to per-card labels so the
    *   user always lands cleanly on a card.
    */
-  const buildExperienceScroll = (
-    root: HTMLElement,
-  ): ExperienceAnimationHandle | null => {
-    const track = root.querySelector<HTMLElement>('.experience-track');
+  const buildExperienceScroll = (): ExperienceAnimationHandle | null => {
 
-    if (!track || !root) return null;
-
+    const root = document.getElementById('experienceDetailedView');
+    if (!root) return null;
+    
     const cards = Array.from(
-      track.querySelectorAll<HTMLElement>('.experience__card'),
+      root.querySelectorAll<HTMLElement>('.experience__card'),
     ).filter((c) => !c.hasAttribute('data-deferred'));
+    
     const numCards = cards.length;
     if (numCards === 0) return null;
 
@@ -588,6 +588,14 @@ const resolved = entries.map((entry) => {
     const timeline = gsap.timeline({
       paused: true,
       defaults: { ease: 'power2.inOut' },
+      onComplete: () => {
+        const btn = document.querySelector<HTMLElement>(
+          '[data-experience-see-all]',
+        );
+        if (btn?.hasAttribute('disabled')) {
+          btn.removeAttribute('disabled');
+        }
+      },
     });
     
     timeline.set(cards[0], { scale: 1, yPercent: -50, xPercent: -50, opacity: 1 });
@@ -634,7 +642,6 @@ const resolved = entries.map((entry) => {
       timeline.addLabel(`card-${step}-end`, segmentTime + STEP_DURATION);
     });
 
-    const getScrollDistance = () => totalDuration * window.innerHeight;
 
     // The pin/scrub lasts for the full scroll distance, so during that
     // window the cards are continuously transformed. Promote them to a
@@ -646,32 +653,20 @@ const resolved = entries.map((entry) => {
     const st = ScrollTrigger.create({
       trigger: root,
       start: 'top top',
-      end: () => `+=${getScrollDistance()}`,
+      end: `+=${numCards * 500}`,
       scrub: 0.4,
       pin: true,
-      pinSpacing: true,
       snap: {
         snapTo: 'labels',
         duration: 0.3,
         ease: 'power1.inOut',
       },
+      
       animation: timeline,
       onEnter: promoteCards,
       onEnterBack: promoteCards,
       onLeave: demoteCards,
       onLeaveBack: demoteCards,
-      // Unlock "see all" once the user has scrolled past every
-      // initially visible card. Progress hits 1 at the end of the
-      // scroll distance (i.e. card-N-end).
-      onUpdate: (self) => {
-        if (self.progress < 1) return;
-        const btn = document.querySelector<HTMLElement>(
-          '[data-experience-see-all]',
-        );
-        if (btn?.hasAttribute('disabled')) {
-          btn.removeAttribute('disabled');
-        }
-      },
     });
 
     return {
@@ -723,7 +718,7 @@ const resolved = entries.map((entry) => {
     // down and rebuild once the deferred cards are revealed.
     const root = document.getElementById('experienceDetailedView');
     let experienceHandle: ExperienceAnimationHandle | null = null;
-    if (root) experienceHandle = buildExperienceScroll(root);
+    if (root) experienceHandle = buildExperienceScroll();
 
     // "See all" button: unhides every deferred card, rebuilds the
     // scroll-driven timeline so they join the deck, then hides itself.
@@ -732,23 +727,17 @@ const resolved = entries.map((entry) => {
     );
     seeAllBtn?.addEventListener('click', () => {
       if (!root) return;
-      const deferred = root.querySelectorAll<HTMLElement>(
-        '.experience__card[data-deferred]',
-      );
-      if (deferred.length === 0) {
-        seeAllBtn.style.display = 'none';
-        return;
+      const deferred = root.querySelectorAll<HTMLElement>( '.experience__card[data-deferred]', );
+      if (deferred.length > 0) {
+        deferred.forEach((card) => card.removeAttribute('data-deferred'));
+        experienceHandle?.destroy();
+        experienceHandle = buildExperienceScroll();
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh();
       }
-      deferred.forEach((card) => card.removeAttribute('data-deferred'));
-      experienceHandle?.destroy();
-      experienceHandle = buildExperienceScroll(root);
-      ScrollTrigger.refresh();
       seeAllBtn.style.display = 'none';
     });
 
-    // Recompute pin distance on resize / language change so the spacer
-    // stays in sync with `getScrollDistance()`.
-    ScrollTrigger.refresh();
 
     // Card expand/collapse interactions.
     document.addEventListener('click', (e) => {

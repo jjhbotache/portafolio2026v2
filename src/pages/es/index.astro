@@ -1,0 +1,12 @@
+---
+import Page from '../../components/Page.astro';
+import { DEFAULT_LANG, type Lang } from '../../i18n/utils';
+
+// `Astro.currentLocale` resolves to `'es'` because the URL is `/es/`
+// (Astro maps the `es` folder to that locale thanks to the `i18n`
+// block in astro.config.mjs). Cast to `Lang` because the i18n config
+// guarantees this URL only ever resolves to one of the configured
+// locales.
+const lang = (Astro.currentLocale ?? DEFAULT_LANG) as Lang;
+---
+<Page lang={lang} />

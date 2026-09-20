@@ -774,20 +774,6 @@ const resolvedEntries = await Promise.all(
       }
     });
 
-    // ─── language change ────────────────────────────────────────────
-    // The lang toggle in Base.astro dispatches this event on `window`.
-    // Every text element already has <span data-lang> pairs that CSS shows
-    // or hides — only the YouTube cc_lang_pref needs a runtime refresh.
-    window.addEventListener('portafolio:lang', () => {
-      if (sheet.dataset.state !== 'open' && sheet.dataset.state !== 'opening') {
-        return;
-      }
-      if (!activeId) return;
-      const activePanel = contents.find((n) => n.dataset.contentid === activeId);
-      if (!activePanel) return;
-      const host = activePanel.querySelector<HTMLElement>('[data-yt-host]');
-    });
-
     // Initially: the SSR rendered the first panel as visible. Tear its
     // YT iframe down so the player doesn't run while the sheet is closed.
     hideAllIframes();
