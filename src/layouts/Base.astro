@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { t, type Lang } from '../i18n/utils';
+import Analytics from '@vercel/analytics/astro'
 
 interface Props {
   lang: Lang;
@@ -49,6 +50,7 @@ const esHref = getRelativeLocaleUrl('es', pathForLocaleUrl);
     <title>{pageTitle}</title>
   </head>
   <body>
+    <Analytics />
     <main>
       <slot />
     </main>

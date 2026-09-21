@@ -11,6 +11,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "astro": "^7.3.1",
     "astro-icon": "^1.2.0",
     "gsap": "^3.12.5",
