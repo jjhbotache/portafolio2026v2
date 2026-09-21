@@ -38,9 +38,11 @@
     height: 6px;
     z-index: 90;
     pointer-events: none;
-    background: #04060a8c;
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
+    /* Solid semitransparent background: the previous `backdrop-filter:
+     * blur(4px)` forced a re-blur of the content scrolling behind on
+     * every frame; on a 6px-tall fixed bar over a near-black page the
+     * visual difference is imperceptible and the cost is real. */
+    background: #04060acc;
   }
 
   .scroll-progress__track {
@@ -56,9 +58,9 @@
     flex: 1 1 0;
     min-width: 0;
     background: #00000059;
-    transition: background var(--t-fast) var(--ease-out);
     box-shadow: 0 1px 7px rgba(2, 183, 255, 0.1);
-    transition: box-shadow var(--t-slow) var(--ease-out);
+    transition: background var(--t-fast) var(--ease-out),
+                box-shadow var(--t-slow) var(--ease-out);
   }
 
   .scroll-progress__segment.is-active {
@@ -69,15 +71,20 @@
   /* Fill bar: pseudo-element translated from -100% to (progress - 100%).
 
      -progress: 0  →  translateX(-100%) (bar fully hidden to the left)
-     -progress: 1  →  translateX(0%)    (bar fully covering the segment) */
+     -progress: 1  →  translateX(0%)    (bar fully covering the segment)
+
+     No `will-change` here: the transform is already updated every frame
+     from JS via the `--progress` custom property, so the browser is
+     already promoting the layer when needed. A static `will-change`
+     would only keep the GPU layer alive during idle (when no segment
+     is animating) and burn VRAM. */
   .scroll-progress__segment::after {
     content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, var(--c-primary) 90%, var(--c-primary-deep) 100%);
-    
+
     transform: translateX(calc(-100% + (var(--progress, 0) * 100%)));
-    will-change: transform;
   }
 </style>
 

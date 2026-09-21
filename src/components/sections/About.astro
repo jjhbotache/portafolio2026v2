@@ -116,8 +116,11 @@ const duplicatedRows = technologyCategories.map((category) => ({
     box-sizing: content-box;
     width: max-content;
     white-space: nowrap;
-    animation: marquee-scroll 80s linear infinite;
-    animation-play-state: paused;
+    /* No animation by default — `prefers-reduced-motion: no-preference`
+     * below opts the user back in. This way users with reduced motion
+     * (OS-level "Reduce Motion" toggle) get a static marquee without
+     * a JS check. */
+    animation: none;
   }
   .about.is-active .about__marquee-track {
     animation-play-state: running;
@@ -131,6 +134,19 @@ const duplicatedRows = technologyCategories.map((category) => ({
     100% { transform: translateX(-50%); }
   }
 
+  /* Respect OS-level "Reduce Motion": without these guards, users with
+   * the accessibility setting get the same infinite marquee + levitate
+   * animations as everyone else. */
+  @media (prefers-reduced-motion: no-preference) {
+    .about__marquee-track {
+      animation: marquee-scroll 80s linear infinite;
+      animation-play-state: paused;
+    }
+    .about__floater {
+      animation-play-state: paused;
+    }
+  }
+
   .about__marquee-item {
     display: flex;
     flex-direction: column;
@@ -141,7 +157,13 @@ const duplicatedRows = technologyCategories.map((category) => ({
     text-decoration: none;
     border: 1px solid transparent;
     border-radius: 0.5rem;
-    transition: all var(--t-fast) var(--ease-out);
+    /* Explicit list (was `transition: all`): avoids capturing future
+     * property additions. Only the values that actually change are
+     * listed. */
+    transition: background-color var(--t-fast) var(--ease-out),
+                border-color var(--t-fast) var(--ease-out),
+                color var(--t-fast) var(--ease-out),
+                transform var(--t-fast) var(--ease-out);
   }
   .about__marquee-item:hover {
     transform: scale(0.95);
@@ -173,11 +195,15 @@ const duplicatedRows = technologyCategories.map((category) => ({
     line-height: 1.4;
     color: var(--c-text);
     max-width: 60rem;
-    backdrop-filter: blur(0.4rem);
+    /* Solid 60% black pill: replaced the previous `backdrop-filter:
+     * blur(0.4rem)` because the section behind is essentially a
+     * dark radial gradient — there is nothing visually useful to blur,
+     * but the filter would repaint the box on every frame the section
+     * re-renders (e.g. the parallax-like GSAP timeline scrolling). */
     border-radius: 1em;
     padding: 1rem ;
     --dark-color: 0;
-    background: rgba(var(--dark-color), var(--dark-color), var(--dark-color), 0.4);
+    background: rgba(var(--dark-color), var(--dark-color), var(--dark-color), 0.6);
     box-shadow: 0 0 2rem rgba(var(--dark-color), var(--dark-color), var(--dark-color),0.8);
     text-align: center;
   }
@@ -214,12 +240,37 @@ const duplicatedRows = technologyCategories.map((category) => ({
   }
   
   .about__floater {
+    position: relative;
     width: max(10vw, 4em);
     height: max(10vw, 4em);
     object-fit: contain;
-    filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 1));
+    /* The shadow was previously `filter: drop-shadow(...)` on the same
+     * element that GSAP / the `levitate` keyframe moves every frame.
+     * `filter` forces a re-raster of the element on every paint, so the
+     * drop-shadow was effectively re-rasterizing the floater 60 times
+     * per second for each of the 4 floaters. The shadow is now a
+     * `box-shadow` on a pseudo-element that sits behind the floater:
+     * the floater itself is now GPU-composited (transform-only), and
+     * the pseudo inherits the transform without re-rasterizing. */
     animation: levitate 3.4s ease-in-out infinite;
     animation-play-state: paused;
+  }
+  .about__floater::after {
+    content: "";
+    position: absolute;
+    inset: -0.4rem;
+    border-radius: 50%;
+   
+
+  @media (prefers-reduced-motion: reduce) {
+    .about__marquee-track,
+    .about__floater,
+    .about__floaters {
+      animation: none !important;
+    }
+  } box-shadow: 0 0 1rem rgba(0, 0, 0, 1);
+    pointer-events: none;
+    z-index: -1;
   }
   .about.is-active .about__floater { animation-play-state: running; }
   .about__floater[data-floater="1"] { animation-duration: 3.4s; }
@@ -246,6 +297,10 @@ const duplicatedRows = technologyCategories.map((category) => ({
   gsap.registerPlugin(TextPlugin);
   gsap.registerPlugin(ScrollTrigger);
 
+  const prefersReducedMotion = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const init = () => {
     const intro = document.querySelector<HTMLElement>('[data-about-intro]');
     const marquees = document.querySelector<HTMLElement>('[data-about-marquees]');
@@ -256,6 +311,21 @@ const duplicatedRows = technologyCategories.map((category) => ({
 
     if (!intro || !marquees || !subintro || !avatar || !floaters || !firstText) return;
 
+    // Reduced-motion fallback: skip the entire pinned scrub. Mark the
+    // section as active so the CSS marquee/levitate animations engage
+    // (well, they stay paused — the @media reduce block nullifies them
+    // — but the section is otherwise "complete"). We keep the avatar
+    // and subintro visible at their final state so the user sees
+     // meaningful content instead of an empty section.
+    if (prefersReducedMotion()) {
+      intro.classList.add('is-active');
+      gsap.set([marquees, firstText, avatar, subintro, floaters], {
+        opacity: 1,
+        scale: 1,
+        clearProps: 'transform,rotate',
+      });
+      return;
+    }
 
     const tl = gsap.timeline({ paused: true});
 
@@ -265,13 +335,14 @@ const duplicatedRows = technologyCategories.map((category) => ({
       yPercent: -40,
       rotate: 25,
       opacity: 1,
-      duration: 1,
-      ease: 'power4.out',
+      duration: 2,
+      ease: 'linear',
     }, 0);
     tl.addLabel('firstSection');
     tl.to(firstText, {
       opacity: 1,
-      duration: .5
+      ease: 'power4.in',
+      duration: 4
     }, 2);
     tl.to(firstText, {
       text: firstText.dataset.text || '',

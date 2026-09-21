@@ -67,6 +67,12 @@ html {
   background: var(--c-bg);
   color: var(--c-text);
   height: 100%;
+  /* ScrollTrigger.refresh() on resize can animate to 0 if the browser
+   * honors a smooth scroll, which makes GSAP measure start/end at the
+   * wrong scroll position. `!important` is intentional: a single
+   * `scroll-behavior: smooth` in any descendant would otherwise win
+   * by specificity and re-introduce the bug. */
+  scroll-behavior: auto !important;
 }
 
 body {

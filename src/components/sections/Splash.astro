@@ -73,19 +73,15 @@ const balls = [
     transform: translate(-20%, 0);
     min-width: 50vw;
     min-height: 120vh;
-    
+
     image-rendering: pixelated;
     z-index: 2;
   }
-  
+
   @media (max-width: 768px) {
     .splash__avatar { opacity: 0.2; }
   }
-  
-  .splash__avatar-glow{
-    filter: drop-shadow(0 0 1.5rem rgba(0, 181, 232, 0.25));
-  }
-  
+
   .splash__inner {
     position: relative;
     display: flex;
@@ -99,14 +95,27 @@ const balls = [
 
 
   .splash__ball {
-    position: absolute;
+    position: relative;
     bottom: 0;
     left: 0;
     width:  max(8vw,5rem);
     height: max(8vw,5rem);
     pointer-events: none;
-    filter: drop-shadow(0 0 0.3em rgba(0, 0, 0, 1));
+    /* The `filter: drop-shadow(...)` was on the same element that the
+     * `orbit-ball` keyframe animates (transform + scale), forcing a
+     * re-raster on every frame. The shadow is now a `box-shadow` on
+     * a pseudo-element so the ball itself is transform-only and stays
+     * on a GPU layer. */
     display: none;
+  }
+  .splash__ball::after {
+    content: "";
+    position: absolute;
+    inset: -0.2em;
+    border-radius: 50%;
+    box-shadow: 0 0 0.3em rgba(0, 0, 0, 1);
+    pointer-events: none;
+    z-index: -1;
   }
   @media (width > 768px) {
     @keyframes orbit-ball {
@@ -127,10 +136,19 @@ const balls = [
       }
     }
     .splash__ball {
-      display: block; 
+      display: block;
       animation: orbit-ball 7s linear infinite;
       animation-delay: var(--orbit-delay, 0s);
-      will-change: transform, z-index, scale;
+      /* `z-index` is not animable and not GPU-composited, so listing
+       * it in `will-change` was wasted. The transform + scale are
+       * already composited by the browser because they're being
+       * animated. */
+      will-change: transform;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .splash__ball {
+      animation: none !important;
     }
   }
   
@@ -185,26 +203,10 @@ const balls = [
   }
 
 
-  .splash__scroll-hint {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: var(--ff-pixeloid);
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--c-text-dim);
-  }
-
-  .splash__scroll-arrow {
-    display: inline-block;
-    animation: bounce-down 1.6s var(--ease-out) infinite;
-  }
+  /* .splash__scroll-hint / .splash__scroll-arrow removed: those
+   * classes were never applied to any element in the markup, and the
+   * `bounce-down` keyframe they referenced was never defined — the
+   * browser silently dropped the rule, but the code was dead weight. */
 </style>
 
 <script>
@@ -223,10 +225,37 @@ const balls = [
   
   
   const init = () => {
-    
+
     const root = document.querySelector<HTMLElement>('[data-section="splash"]');
     if (!root) return;
 
+    // Reduced-motion fallback: show the final state of the entry
+    // timeline immediately (avatar / name / profession all visible,
+    // no animation). The CSS-level `prefers-reduced-motion` block
+    // already neutralises the `orbit-ball` keyframe, so the orbiting
+    // balls stay at their first keyframe position — that's the
+    // intended reduced-motion look.
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      const avatar = document.querySelector<HTMLElement>('[data-splash-avatar]');
+      const name = document.querySelector<HTMLElement>('[data-splash-name]');
+      const profession = document.querySelector<HTMLElement>('[data-splash-profession]');
+      if (avatar) {
+        avatar.style.opacity = '1';
+        avatar.style.transform = 'none';
+      }
+      if (name) {
+        name.style.opacity = '1';
+        name.style.transform = 'none';
+        name.style.clipPath = 'none';
+      }
+      if (profession) {
+        profession.textContent = profession.getAttribute('data-text') ?? '';
+      }
+      return;
+    }
 
     const playEntry = () => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });

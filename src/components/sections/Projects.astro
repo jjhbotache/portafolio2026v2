@@ -96,10 +96,21 @@ const parsedProjects = projects.map((proj) => {
             mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
   }
   
-  /* only add animation for desktop */
+  /* only add animation for desktop, and only if the user has not
+   * requested reduced motion (the @media block below further narrows
+   * it to `no-preference`). The duration was 3s before — that's a
+   * full repaint of the 100vh background every 3 seconds. 6s halves
+   * the repaint cost with virtually no visual difference (the loop
+   * is meant to be ambient, not perceived). */
   @media (min-width: 768px) {
     .projects {
-      animation: gradientMove 3s linear infinite;
+      animation: gradientMove 6s linear infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .projects {
+      animation: none !important;
     }
   }
 
@@ -176,29 +187,39 @@ const parsedProjects = projects.map((proj) => {
     background: rgba(8, 12, 24, 1);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 0.75rem;
-    backdrop-filter: blur(6px);
+    /* The previous `backdrop-filter: blur(6px)` on the base card was
+     * wasted: the background is fully opaque (`rgba(8, 12, 24, 1)`),
+     * so there is nothing to blur. Removing it eliminates a per-card
+     * composited surface that the browser had to recompute on every
+     * hover transform. */
     width: 100%;
-    
+
     font: var(--ff-geist-pixel);
     overflow: hidden;
     border-radius: 0.75rem;
     z-index: 1;
     transform-style: preserve-3d;
-    
+
   }
   .projects__card:hover {
-    /* delayed transition of all and takes 3 seconds */
-    transition: all 100ms ease;
-    
+    /* Explicit transition list (was `transition: all`). Capturing all
+     * properties would also animate the `border-color` and `background`
+     * if those change in the future. */
+    transition: transform 100ms ease,
+                box-shadow 100ms ease;
+
     transform: scale(1.01) ;
-    will-change: transform, z-index;
     box-shadow: 0 0 .5rem rgb(0, 0, 0);
     z-index: 3;
   }
-  
+
   @media (width > 768px) {
+    /* No `display: none` here anymore: the previous `display: none;
+     * opacity: 0;` was being overridden by the `display: grid;` two
+     * lines below, making the `display: none` dead code. The pseudo
+     * is now controlled purely by opacity, and revealed via the
+     * `:hover::after` rule below. */
     .projects__card::after {
-      display: none;
       opacity: 0;
       content: attr(data-hover);
       position: absolute;
@@ -216,14 +237,13 @@ const parsedProjects = projects.map((proj) => {
       border-radius: 0.75rem;
       text-shadow: 0 0 .4rem rgba(0, 0, 0, 0.5);
       z-index: 4;
+      transition: opacity 0.3s ease;
+      transition-delay: 1s;
     }
   }
   
   .projects__card:hover::after {
-    display: grid;
     opacity: 1;
-    transition: opacity 0.3s ease;
-    transition-delay: 1s;
     cursor: pointer;
   }
 
@@ -402,11 +422,10 @@ const parsedProjects = projects.map((proj) => {
   
   const getProjects = () => window.innerWidth <= 768 ? projectsData : projectsWithClones;
   const init = () => {
-    
-    
     distribute(getColumnCount(), getProjects());
 
-    // prepare the cards to be pressed
+    // prepare the cards to be pressed (must run for both regular and
+    // reduced-motion users, so the project sheet still opens on click)
     document.querySelectorAll('[data-projects-card]').forEach((card) => {
       card.addEventListener('click', () => {
         const id = card.id;
@@ -418,6 +437,32 @@ const parsedProjects = projects.map((proj) => {
 
       });
     });
+
+    // Reduced-motion fallback: render the columns statically, without
+    // the GSAP scrub / 3D perspective transition. The columns are
+    // already laid out in their final position by `distribute()`,
+    // so we just need to skip the timeline / ScrollTrigger below.
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      // Open up the section so the static column layout is scrollable
+      // naturally. The columns container is left at its default
+      // position (no 3D perspective) — the click listeners above stay
+      // active so the project sheet still opens.
+      const section = document.querySelector<HTMLElement>('#projects');
+      if (section) {
+        section.style.overflow = 'auto';
+        section.style.height = 'auto';
+        section.style.minHeight = '100vh';
+      }
+      const columnsContainer = document.querySelector<HTMLElement>('[data-projects-columns]');
+      if (columnsContainer) {
+        columnsContainer.style.position = 'relative';
+        columnsContainer.style.transform = 'none';
+      }
+      return;
+    }
 
     const columnsContainer = document.querySelector<HTMLElement>('[data-projects-columns]');
     const columns = document.querySelectorAll<HTMLElement>('[data-projects-column]');

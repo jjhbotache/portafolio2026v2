@@ -1,4 +1,4 @@
----
+﻿---
 import { t, type Lang } from '../../i18n/utils';
 import { getCollection } from 'astro:content';
 import { marked } from 'marked';
@@ -14,7 +14,7 @@ const entries = (await getCollection('experiences'))
 
 // Pre-parse the bilingual `content` frontmatter field to HTML so the
 // detail overlay can inject it with `set:html` (instead of relying on
-// the markdown body via `astro:content`'s render — which renders only
+// the markdown body via `astro:content`'s render â€” which renders only
 // the (placeholder) body). Both languages are pre-computed so a locale
 // switch does not require a re-fetch.
 const resolved = entries.map((entry) => {
@@ -129,7 +129,7 @@ const resolved = entries.map((entry) => {
                 class="experience__card-close"
                 data-experience-close={exp.id}
                 aria-label={close}
-              >×</button>
+              >Ã—</button>
               
               <div class="experience__card-overlay-inner">
                 <div class="experience__card-techs">
@@ -203,7 +203,13 @@ const resolved = entries.map((entry) => {
     align-items: center;
     gap: 2.5rem;
     overflow: hidden;
-    background-image: radial-gradient(at 2.449776481987598% 8.939610039451761%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 1) 0%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 0) 100%), radial-gradient(at 42.03370272534325% 10.152041719077209%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 1) 0%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 0) 100%), radial-gradient(at 46.04150550971183% 10.904597467327616%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 1) 0%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 0) 100%), radial-gradient(at 79.47220125653968% 15.701274245713037%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 1) 0%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 0) 100%), radial-gradient(at 50.25737435670721% 65.23039692548085%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 1) 0%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 0) 100%), radial-gradient(at 53.41672441624726% 55.54325734308681%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 1) 0%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 0) 100%), radial-gradient(at 60.39679220750175% 54.52117458311415%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 1) 0%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 0) 100%), radial-gradient(at 29.300172051601514% 69.45828193884219%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 1) 0%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 0) 100%), radial-gradient(at 22.7472856835806% 50.28007366256123%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 1) 0%, hsla(241.15384615384613, 56.52173913043478%, 18.03921568627451%, 0) 100%), radial-gradient(at 30.804914779526904% 81.80916251771721%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 1) 0%, hsla(292.6530612244898, 59.756097560975604%, 32.15686274509804%, 0) 100%), radial-gradient(at 63.397659634261274% 2.4538925275960355%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 1) 0%, hsla(253.33333333333334, 58.69565217391304%, 18.03921568627451%, 0) 100%), radial-gradient(at 88.18512555399265% 88.39565429407178%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 1) 0%, hsla(240.81081081081078, 56.060606060606055%, 25.882352941176475%, 0) 100%);
+    background-color: #0a0d1f;
+    background-image:
+      radial-gradient(at 5% 12%, hsla(241, 57%, 18%, 0.55) 0%, transparent 60%),
+      radial-gradient(at 45% 10%, hsla(293, 60%, 32%, 0.55) 0%, transparent 60%),
+      radial-gradient(at 80% 18%, hsla(241, 56%, 26%, 0.55) 0%, transparent 60%),
+      radial-gradient(at 52% 60%, hsla(253, 59%, 25%, 0.55) 0%, transparent 60%),
+      radial-gradient(at 28% 75%, hsla(293, 60%, 32%, 0.55) 0%, transparent 60%);
   }
 
   /* Pinned content layer. While the user scrolls, ScrollTrigger keeps
@@ -263,19 +269,36 @@ const resolved = entries.map((entry) => {
     max-height: 65vh;
     left: 50%;
     top: 50%;
-    
+
     display: grid;
     grid-template-columns: 2fr 3fr;
-    
+
     gap: 0.85rem;
     padding: 1rem;
     background: linear-gradient(135deg, var(--c-primary) 0%, #0c1f4a 80%);
     border-radius: 0.2rem;
     overflow: hidden;
-    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
     transform-origin: 50% 0%;
-    
-    will-change: transform, opacity;
+    /* No `will-change` here. Every card in the track would otherwise
+     * sit on a permanent GPU layer from SSR, burning VRAM even before
+     * the user scrolls to the section. The JS already promotes the
+     * cards via `promoteCards()` on `onEnter` and releases them on
+     * `onLeave` (see the ScrollTrigger below), so the layer is only
+     * alive while the scrub is actually running.
+     *
+     * The `box-shadow` was also moved to a pseudo-element so the card
+     * itself can be GPU-composited (transform-only) without re-painting
+     * the shadow on every scrub frame. */
+  }
+
+  .experience__card::after {
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+    border-radius: 0.4rem;
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: -1;
   }
   
   @media (aspect-ratio <= 1/1) {
@@ -572,18 +595,43 @@ const resolved = entries.map((entry) => {
 
     const root = document.getElementById('experienceDetailedView');
     if (!root) return null;
-    
+
     const cards = Array.from(
       root.querySelectorAll<HTMLElement>('.experience__card'),
     ).filter((c) => !c.hasAttribute('data-deferred'));
-    
+
     const numCards = cards.length;
     if (numCards === 0) return null;
+
+    // Reduced-motion fallback: lay all cards in a static horizontal
+    // strip (no pin, no scrub) so the section is still navigable and
+    // the user can read every card without triggering the long pinned
+    // scroll animation. We trade the deck-of-cards effect for
+    // accessibility.
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      const track = root.querySelector<HTMLElement>('.experience__track');
+      if (track) {
+        track.style.display = 'flex';
+        track.style.flexDirection = 'row';
+        track.style.gap = '1rem';
+        track.style.overflowX = 'auto';
+      }
+      for (const card of cards) {
+        card.style.position = 'relative';
+        card.style.left = 'auto';
+        card.style.top = 'auto';
+        card.style.transform = 'none';
+        card.style.opacity = '1';
+      }
+      return null;
+    }
 
 
     const STEP_DURATION = 1;
     const STACK_OFFSET_PERCENTAGE = 4;
-    const totalDuration = Math.max(0, (numCards - 1) * STEP_DURATION);
 
     const timeline = gsap.timeline({
       paused: true,
@@ -679,12 +727,15 @@ const resolved = entries.map((entry) => {
     };
   };
 
-  const init = () => {
-    // Swiper decks per card. CSS for look-and-feel lives in the <style> block.
+  /**
+   * Initialize Swiper instances for all non-deferred experience card swipers.
+   * Called on page load and again after deferred cards are revealed.
+   */
+  const initSwipers = () => {
     document
       .querySelectorAll<HTMLElement>('[data-experience-swiper]')
       .forEach((el) => {
-        // Skip swipers inside deferred cards — they are display:none and
+        // Skip swipers inside deferred cards â€” they are display:none and
         // Swiper would otherwise try to measure a zero-sized container.
         if (el.closest('.experience__card[data-deferred]')) return;
         const cardId = el.getAttribute('data-card-id');
@@ -713,6 +764,11 @@ const resolved = entries.map((entry) => {
           observeParents: true,
         });
       });
+  };
+
+  const init = () => {
+    // Initialize Swiper carousels for visible cards.
+    initSwipers();
 
     // Scroll-driven card stack. The handle is kept so we can tear it
     // down and rebuild once the deferred cards are revealed.
@@ -732,6 +788,8 @@ const resolved = entries.map((entry) => {
         deferred.forEach((card) => card.removeAttribute('data-deferred'));
         experienceHandle?.destroy();
         experienceHandle = buildExperienceScroll();
+        // Initialize Swipers for the newly revealed cards.
+        initSwipers();
         ScrollTrigger.sort();
         ScrollTrigger.refresh();
       }
