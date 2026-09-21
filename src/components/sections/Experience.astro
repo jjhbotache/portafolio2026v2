@@ -100,13 +100,21 @@ const resolved = entries.map((entry) => {
                   <div class="swiper-wrapper experience__swiper-wrapper">
                     {exp.data.imgs.map((src) => (
                       <div class="swiper-slide experience__swiper-slide">
-                        <img
-                          src={src}
-                          alt={title}
-                          class="experience__swiper-image"
-                          loading="lazy"
-                          decoding="async"
-                        />
+                        <button
+                          type="button"
+                          class="experience__swiper-image-button"
+                          data-lightbox-src={src}
+                          data-lightbox-alt={title}
+                          aria-label={title}
+                        >
+                          <img
+                            src={src}
+                            alt={title}
+                            class="experience__swiper-image"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -129,7 +137,7 @@ const resolved = entries.map((entry) => {
                 class="experience__card-close"
                 data-experience-close={exp.id}
                 aria-label={close}
-              >Ã—</button>
+              >x</button>
               
               <div class="experience__card-overlay-inner">
                 <div class="experience__card-techs">
@@ -189,6 +197,28 @@ const resolved = entries.map((entry) => {
         <span data-lang={lang}>{t(lang, 'experience.seeAll')}</span>
       </button>
     </div>
+  </div>
+
+  <!-- Lightbox: opens when a swiper image is clicked. Rendered once at
+       the section level so the click target (image button) only needs to
+       toggle attributes on this single shared element. -->
+  <div
+    class="experience__lightbox"
+    data-experience-lightbox
+    aria-hidden="true"
+    role="dialog"
+  >
+    <button
+      type="button"
+      class="experience__lightbox-close"
+      data-experience-lightbox-close
+      aria-label="Close"
+    >x</button>
+    <img
+      class="experience__lightbox-image"
+      data-experience-lightbox-image
+      alt=""
+    />
   </div>
 
 </section>
@@ -505,9 +535,12 @@ const resolved = entries.map((entry) => {
     top: 1.25rem;
     right: 1.25rem;
     font-size: 1.5rem;
+    font-family: var(--ff-pixeloid);
     line-height: 1;
     color: var(--c-text);
+    transition: all var(--t-fast) var(--ease-out);
   }
+  .experience__card-close:hover { color: var(--c-secondary); scale: 0.9; }
 
   .experience__controls {
     display: flex;
@@ -556,6 +589,107 @@ const resolved = entries.map((entry) => {
     position: absolute;
     top: 0;
     left: 0;
+  }
+
+  /* Clickable wrapper around the swiper image. Renders as a transparent
+     button so the <img> stays a normal element (lightbox CSS hooks
+     `data-lightbox-src` via the parent button). We reset the native
+     button styles and keep the click target covering the whole slide. */
+  .experience__swiper-image-button {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    cursor: zoom-in;
+    overflow: hidden;
+  }
+  .experience__swiper-image-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    transition: background var(--t-fast) var(--ease-out);
+    pointer-events: none;
+  }
+  .experience__swiper-image-button:hover::after {
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .experience__swiper-image-button:focus-visible {
+    outline: 2px solid var(--c-secondary);
+    outline-offset: -2px;
+  }
+
+  /* Fullscreen image lightbox. Fixed to the viewport so it floats
+     above the pinned section / ScrollTrigger wrappers. The `is-open`
+     class drives opacity + transform for a snappy open/close. */
+  .experience__lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(5, 8, 22, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--t-med) var(--ease-out),
+      visibility var(--t-med) var(--ease-out);
+  }
+  .experience__lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .experience__lightbox-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transform: scale(0.95);
+    transition: transform var(--t-med) var(--ease-out);
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.6);
+    border-radius: 0.25rem;
+  }
+  .experience__lightbox.is-open .experience__lightbox-image {
+    transform: scale(1);
+  }
+
+  .experience__lightbox-close {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    font-family: var(--ff-pixeloid);
+    padding: 0 0 0.15rem 0.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.45);
+    color: var(--c-text);
+    cursor: pointer;
+    z-index: 2;
+    
+    transition:
+      background var(--t-fast) var(--ease-out),
+      transform var(--t-fast) var(--ease-out),
+      border-color var(--t-fast) var(--ease-out);
+  }
+  .experience__lightbox-close:hover {
+    background: var(--c-secondary);
+    color: var(--c-bg);
+    border-color: var(--c-secondary);
   }
 
 </style>
@@ -775,6 +909,81 @@ const resolved = entries.map((entry) => {
     const root = document.getElementById('experienceDetailedView');
     let experienceHandle: ExperienceAnimationHandle | null = null;
     if (root) experienceHandle = buildExperienceScroll();
+
+    // Lightbox: opens when a swiper image is clicked, closes via the X
+    // button, the backdrop, or the Escape key. The image source/alt are
+    // pulled from the trigger's `data-lightbox-*` attributes. While
+    // open we lock body scroll so the page underneath doesn't drift
+    // (the pinned ScrollTrigger would otherwise consume wheel input).
+    const lightbox = document.querySelector<HTMLElement>(
+      '[data-experience-lightbox]',
+    );
+    const lightboxImage = document.querySelector<HTMLImageElement>(
+      '[data-experience-lightbox-image]',
+    );
+    const lightboxClose = document.querySelector<HTMLElement>(
+      '[data-experience-lightbox-close]',
+    );
+
+    const openLightbox = (src: string, alt: string) => {
+      if (!lightbox || !lightboxImage) return;
+      lightboxImage.src = src;
+      lightboxImage.alt = alt;
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeLightbox = () => {
+      if (!lightbox) return;
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+
+    if (lightbox) {
+      // Click on the backdrop (not on the image itself) closes the
+      // lightbox. We delegate to the lightbox container and ignore
+      // events whose target is the inner image.
+      lightbox.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (
+          target.closest('[data-experience-lightbox-close]') ||
+          target.closest('[data-experience-lightbox-image]')
+        ) {
+          return;
+        }
+        closeLightbox();
+      });
+    }
+
+    lightboxClose?.addEventListener('click', closeLightbox);
+
+    // Delegated handler so it keeps working for deferred cards that
+    // are revealed later. The button is the <button> wrapper around
+    // the <img>, not the img itself, so we look for the closest match.
+    document.addEventListener('click', (e) => {
+      const trigger = (e.target as HTMLElement).closest<HTMLElement>(
+        '[data-lightbox-src]',
+      );
+      if (!trigger) return;
+      // Swiper slides can receive clicks via Swiper's internal handlers;
+      // stopPropagation here keeps the card expand/collapse listener
+      // from also toggling `is-expanded` on the parent card.
+      e.stopPropagation();
+      e.preventDefault();
+      const src = trigger.getAttribute('data-lightbox-src');
+      const alt = trigger.getAttribute('data-lightbox-alt') ?? '';
+      if (src) openLightbox(src, alt);
+    });
+
+    // Escape closes the lightbox regardless of focus. Bound at init so
+    // it works even after the user has tabbed into a swiper control.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox?.classList.contains('is-open')) {
+        closeLightbox();
+      }
+    });
 
     // "See all" button: unhides every deferred card, rebuilds the
     // scroll-driven timeline so they join the deck, then hides itself.
