@@ -45,6 +45,11 @@ const duplicatedRows = technologyCategories.map((category) => ({
 
   
   <img src="/me.png" alt="Juan Jose Huertas avatar" class="about__avatar" data-about-avatar />
+  
+  <!-- btn for the cv -->
+  <a href={lang=="es"?"cv_es.pdf":"cv_en.pdf"} download class="CV-btn" data-lang={lang}>
+    {t(lang, 'sections.about.downloadCV')}
+  </a>
   <div class="about__floaters" data-about-floaters>
     <img src="/js_ball.png" alt="JavaScript" class="about__floater" data-floater="1" />
     <img src="/react_ball.png" alt="React" class="about__floater" data-floater="2" />
@@ -225,6 +230,24 @@ const duplicatedRows = technologyCategories.map((category) => ({
     image-rendering: pixelated;
     filter: drop-shadow(0 0 1rem rgba(0, 181, 232, 0.4));
   }
+  
+  .CV-btn{
+    
+    position: absolute;
+    top: 68%;
+    transform: translateY(-50%) scale(0.1);
+    opacity: 0;
+    padding: 0.5rem 1rem;
+    font-family: var(--ff-pixeloid);
+    font-size: clamp(.7rem, 1.5vh, 2.2rem);
+    line-height: 1.4;
+    color: var(--c-text);
+    background-color: var(--c-secondary);
+    border-radius: 1em;
+    text-decoration: none;
+    z-index: 3;
+    box-shadow: 0 0 .5rem var(--c-secondary);
+  }
 
 
   .about__floaters {
@@ -392,6 +415,13 @@ const duplicatedRows = technologyCategories.map((category) => ({
       ease: 'sine.inOut',
       duration: 10
     }, "<");
+    tl.to(".CV-btn", {
+      display: 'block',
+      opacity: 1,
+      scale: 1,
+      duration: 5,
+      ease: 'power1.out',
+    }, "<");
     
     tl.addLabel('secondSection');
 
@@ -415,6 +445,12 @@ const duplicatedRows = technologyCategories.map((category) => ({
       duration: 15,
       ease: 'power4.in',
     }, "<");
+    tl.to(".CV-btn", {
+      clipPath: "inset(0 100% 0 0)",
+      duration: 5,
+      ease: 'power4.in',
+    }, "<+=5");  
+  
 
     // The pin/scrub lasts for +=5000 of scroll, so during that window
     // every animated element is continuously transformed. Promote them

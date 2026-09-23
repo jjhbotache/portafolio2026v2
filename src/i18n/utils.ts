@@ -56,6 +56,7 @@ const es = {
   'sections.about.body': 'Soy un desarrollador apasionado por la tecnología y el software. Me encanta simplificar la vida mediante la tecnología y sus mejores prácticas.',
   'sections.about.body2': 'Es por eso que me he especializado en Javascript y Python, tecnologías con las que la mayoría de problemas, es posible solucionar.',
   'sections.about.techLabel': 'Tecnologías',
+  'sections.about.downloadCV' : "descargar CV",
 
   'sections.projects.title': 'Mis proyectos',
   "sections.projects.hover": "Ver el proyecto",
@@ -97,6 +98,7 @@ const en: typeof es = {
   'sections.about.body': "I'm a developer passionate about technology and software. I love simplifying life through technology and its best practices.",
   'sections.about.body2': 'That is why I have specialised in JavaScript and Python, technologies that make it possible, for most problems, find out a solution.',
   'sections.about.techLabel': 'Technologies',
+  'sections.about.downloadCV' : "download CV",
 
   'sections.projects.title': 'My projects',
   "sections.projects.hover": "View project",
